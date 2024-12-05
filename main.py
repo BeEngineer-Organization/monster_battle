@@ -8,15 +8,14 @@ WRITER = puf.Writer("misaki_gothic.ttf")
 
 SELECT_ACTION_SCENE = 0
 SELECT_MOVE_SCENE = 1
-SELECT_MONSTER_SCENE = 2
+BATTLE_SCENE = 2
+SELECT_MONSTER_SCENE = 3
 
 MESSAGE_X = 40
 DELTA_MESSAGE_Y = 22
-MESSAGE_1_Y = HEIGHT * 0.66
-MESSAGE_2_Y = MESSAGE_1_Y + DELTA_MESSAGE_Y
-MESSAGE_3_Y_Y = MESSAGE_2_Y + DELTA_MESSAGE_Y
-MESSAGE_4_Y = MESSAGE_3_Y_Y + DELTA_MESSAGE_Y
-MESSAGE_5_Y = MESSAGE_4_Y + DELTA_MESSAGE_Y
+MESSAGE_Y = []
+for i in range(5):
+    MESSAGE_Y.append(HEIGHT * 0.66 + i * DELTA_MESSAGE_Y)
 MESSAGE_FONT_SIZE = 16
 
 
@@ -43,20 +42,20 @@ def draw_monster_name_and_hp(monster, x, y, is_visible=True):
 class SelectTriangle:
     def __init__(self, max_y1):
         self.x1 = MESSAGE_X
-        self.y1 = MESSAGE_1_Y
+        self.y1 = MESSAGE_Y[0]
         self.x2 = MESSAGE_X
-        self.y2 = MESSAGE_1_Y + 12
+        self.y2 = MESSAGE_Y[0] + 12
         self.x3 = MESSAGE_X + 10
-        self.y3 = MESSAGE_1_Y + 6
+        self.y3 = MESSAGE_Y[0] + 6
         self.max_y1 = max_y1
 
     def reset(self, max_y1):
         self.x1 = MESSAGE_X
-        self.y1 = MESSAGE_1_Y
+        self.y1 = MESSAGE_Y[0]
         self.x2 = MESSAGE_X
-        self.y2 = MESSAGE_1_Y + 12
+        self.y2 = MESSAGE_Y[0] + 12
         self.x3 = MESSAGE_X + 10
-        self.y3 = MESSAGE_1_Y + 6
+        self.y3 = MESSAGE_Y[0] + 6
         self.max_y1 = max_y1
 
     def draw(self):
@@ -76,7 +75,7 @@ class SelectTriangle:
         else:
             delta_y = DELTA_MESSAGE_Y
 
-        if MESSAGE_1_Y <= self.y1 + delta_y and self.y1 + delta_y <= self.max_y1:
+        if MESSAGE_Y[0] <= self.y1 + delta_y and self.y1 + delta_y <= self.max_y1:
             self.y1 += delta_y
             self.y2 += delta_y
             self.y3 += delta_y
@@ -89,12 +88,16 @@ class App:
         self.scene = SELECT_ACTION_SCENE
         self.my_monsters = []
         self.opponenent_monsters = []
-        self.select_triangle = SelectTriangle(MESSAGE_2_Y)
+        self.select_triangle = SelectTriangle(MESSAGE_Y[1])
         self.game_settings()
 
     def game_settings(self):
+        # 手持ちのモンスター
         self.my_monsters.append(ALL_MONSTERS[0])
         self.opponenent_monsters.append(ALL_MONSTERS[0])
+        # 場に出ているモンスター
+        self.my_monster_battling = self.my_monsters[0]
+        self.opponenent_monster_battling = self.opponenent_monsters[0]
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -111,11 +114,11 @@ class App:
             self.select_triangle.select()
 
         elif pyxel.btnr(pyxel.KEY_SPACE):
-            if self.select_triangle.y1 == MESSAGE_1_Y:
+            if self.select_triangle.y1 == MESSAGE_Y[0]:
                 # 技選択画面に移動
-                self.select_triangle.reset(MESSAGE_5_Y)
+                self.select_triangle.reset(MESSAGE_Y[4])
                 self.scene = SELECT_MOVE_SCENE
-            elif self.select_triangle.y1 == MESSAGE_2_Y:
+            elif self.select_triangle.y1 == MESSAGE_Y[1]:
                 # モンスター選択画面に移動
                 self.scene = SELECT_MONSTER_SCENE
 
@@ -127,10 +130,18 @@ class App:
             self.select_triangle.select()
 
         elif pyxel.btnr(pyxel.KEY_SPACE):
-            if self.select_triangle.y1 == MESSAGE_5_Y:
+            if self.select_triangle.y1 == MESSAGE_Y[4]:
                 # 技選択画面に移動
-                self.select_triangle.reset(MESSAGE_2_Y)
+                self.select_triangle.reset(MESSAGE_Y[1])
                 self.scene = SELECT_ACTION_SCENE
+            else:
+                index = MESSAGE_Y.index(self.select_triangle.y1)
+                try:
+                    self.my_move = self.my_monster_battling.moves[index]
+                    self.scene = BATTLE_SCENE
+                except IndexError:
+                    return
+                # 選択した技があるとき
 
     def draw(self):
         pyxel.cls(7)
@@ -142,15 +153,18 @@ class App:
             self.draw_select_move_scene()
 
     def draw_monsters(self):
-        # モンスターを描画
-        self.my_monsters[0].draw_monster(WIDTH * 0.33, HEIGHT * 0.33, 4, True)
-        self.opponenent_monsters[0].draw_monster(WIDTH * 0.66, HEIGHT * 0.33, 4)
+        # 場に出ているモンスターを描画
+        self.my_monster_battling.draw_monster(WIDTH * 0.33, HEIGHT * 0.33, 4, True)
+        self.opponenent_monster_battling.draw_monster(WIDTH * 0.66, HEIGHT * 0.33, 4)
         # モンスターの名前とHPを描画
         draw_monster_name_and_hp(
-            self.my_monsters[0], WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100
+            self.my_monster_battling, WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100
         )
         draw_monster_name_and_hp(
-            self.opponenent_monsters[0], WIDTH * 0.66 - 40, HEIGHT * 0.33 - 100, False
+            self.opponenent_monster_battling,
+            WIDTH * 0.66 - 40,
+            HEIGHT * 0.33 - 100,
+            is_visible=False,
         )
         # 「YOURS」を描画
         WRITER.draw(WIDTH * 0.33 - 30, HEIGHT * 0.33 + 60, "YOURS", 32, 8)
@@ -159,18 +173,20 @@ class App:
 
     def draw_select_action_scene(self):
         # メッセージを描画
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_1_Y, "たたかう", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_2_Y, "モンスター", MESSAGE_FONT_SIZE, 0)
+        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[0], "たたかう", MESSAGE_FONT_SIZE, 0)
+        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[1], "モンスター", MESSAGE_FONT_SIZE, 0)
         # 矢印の描画
         self.select_triangle.draw()
 
     def draw_select_move_scene(self):
         # メッセージを描画
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_1_Y, "たいあたり", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_2_Y, "つるのむち", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_3_Y_Y, "はたく", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_4_Y, "のしかかる", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_5_Y, "もどる", MESSAGE_FONT_SIZE, 0)
+        counter = 0
+        for move in self.my_monster_battling.moves:
+            WRITER.draw(
+                MESSAGE_X + 20, MESSAGE_Y[counter], move.name, MESSAGE_FONT_SIZE, 0
+            )
+            counter += 1
+        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0)
         # 矢印の描画
         self.select_triangle.draw()
 

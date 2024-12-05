@@ -1,4 +1,5 @@
 from models import Monster
+from moves import ALL_MOVES
 
 ALL_MONSTERS = [
     Monster(
@@ -15,6 +16,7 @@ ALL_MONSTERS = [
         85,
         85,
         65,
+        [ALL_MOVES[1], ALL_MOVES[0]],
         {
             "ノーマル": 1,
             "ほのお": 2,
