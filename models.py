@@ -135,4 +135,4 @@ class RecoverMove(Move):
         self.kind = "recover"
 
     def get_info(self):
-        return {"kind": self.kind, "type": self.type}
+        return {"kind": self.kind}
