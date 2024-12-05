@@ -20,7 +20,7 @@ MESSAGE_5_Y = MESSAGE_4_Y + DELTA_MESSAGE_Y
 MESSAGE_FONT_SIZE = 16
 
 
-def draw_name_and_hp(monster, x, y, is_visible=True):
+def draw_monster_name_and_hp(monster, x, y, is_visible=True):
     # 名前を描画
     WRITER.draw(x, y, monster.name, 16, 0)
     # HPバーを描画
@@ -146,8 +146,10 @@ class App:
         self.my_monsters[0].draw_monster(WIDTH * 0.33, HEIGHT * 0.33, 4, True)
         self.opponenent_monsters[0].draw_monster(WIDTH * 0.66, HEIGHT * 0.33, 4)
         # モンスターの名前とHPを描画
-        draw_name_and_hp(self.my_monsters[0], WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100)
-        draw_name_and_hp(
+        draw_monster_name_and_hp(
+            self.my_monsters[0], WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100
+        )
+        draw_monster_name_and_hp(
             self.opponenent_monsters[0], WIDTH * 0.66 - 40, HEIGHT * 0.33 - 100, False
         )
         # 「YOURS」を描画
