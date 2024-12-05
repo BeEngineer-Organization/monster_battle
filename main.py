@@ -1,8 +1,10 @@
 import pyxel
+import PyxelUniversalFont as puf
 
-from monster import WRITER, ALL_MONSTERS
+from monsters import ALL_MONSTERS
 
 WIDTH, HEIGHT = 640, 400
+WRITER = puf.Writer("misaki_gothic.ttf")
 
 SELECT_ACTION_SCENE = 0
 SELECT_MOVE_SCENE = 1
@@ -16,6 +18,26 @@ MESSAGE_3_Y_Y = MESSAGE_2_Y + DELTA_MESSAGE_Y
 MESSAGE_4_Y = MESSAGE_3_Y_Y + DELTA_MESSAGE_Y
 MESSAGE_5_Y = MESSAGE_4_Y + DELTA_MESSAGE_Y
 MESSAGE_FONT_SIZE = 16
+
+
+def draw_name_and_hp(monster, x, y, is_visible=True):
+    # 名前を描画
+    WRITER.draw(x, y, monster.name, 16, 0)
+    # HPバーを描画
+    pyxel.rect(x, y + 20, 100, 10, 0)
+    hp_ratio = monster.hp_now / monster.hp
+    if hp_ratio < 0.25:
+        # HPが1/4未満のとき赤色
+        hp_color = 8
+    elif hp_ratio < 0.5:
+        # HPが1/4以上1/2未満のとき黄色
+        hp_color = 10
+    else:
+        hp_color = 11
+    pyxel.rect(x, y + 20, 100 * hp_ratio, 10, hp_color)
+    if is_visible:
+        # HP情報を描画
+        WRITER.draw(x, y + 35, f"{str(monster.hp_now)}/{str(monster.hp)}", 16, 0)
 
 
 class SelectTriangle:
@@ -124,9 +146,9 @@ class App:
         self.my_monsters[0].draw_monster(WIDTH * 0.33, HEIGHT * 0.33, 4, True)
         self.opponenent_monsters[0].draw_monster(WIDTH * 0.66, HEIGHT * 0.33, 4)
         # モンスターの名前とHPを描画
-        self.my_monsters[0].draw_name_and_hp(WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100)
-        self.opponenent_monsters[0].draw_name_and_hp(
-            WIDTH * 0.66 - 40, HEIGHT * 0.33 - 100, False
+        draw_name_and_hp(self.my_monsters[0], WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100)
+        draw_name_and_hp(
+            self.opponenent_monsters[0], WIDTH * 0.66 - 40, HEIGHT * 0.33 - 100, False
         )
         # 「YOURS」を描画
         WRITER.draw(WIDTH * 0.33 - 30, HEIGHT * 0.33 + 60, "YOURS", 32, 8)
