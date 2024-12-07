@@ -136,3 +136,48 @@ class RecoverMove(Move):
 
     def get_info(self):
         return {"kind": self.kind}
+
+
+class SelectTriangle:
+    def __init__(self, base_x, base_y, delta_y, y1_max):
+        self.base_x = base_x
+        self.base_y = base_y
+        self.delta_y = delta_y
+        self.y1_max = y1_max
+        self.x1 = base_x
+        self.y1 = base_y
+        self.x2 = base_x
+        self.y2 = base_y + 12
+        self.x3 = base_x + 10
+        self.y3 = base_y + 6
+
+    def reset(self, y1_max):
+        self.x1 = self.base_x
+        self.y1 = self.base_y
+        self.x2 = self.base_x
+        self.y2 = self.base_y + 12
+        self.x3 = self.base_x + 10
+        self.y3 = self.base_y + 6
+        self.y1_max = y1_max
+
+    def draw(self):
+        pyxel.tri(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2,
+            self.x3,
+            self.y3,
+            0,
+        )
+
+    def select(self, is_up=False):
+        if is_up:
+            delta_y = self.delta_y * -1
+        else:
+            delta_y = self.delta_y
+
+        if self.base_y <= self.y1 + delta_y and self.y1 + delta_y <= self.y1_max:
+            self.y1 += delta_y
+            self.y2 += delta_y
+            self.y3 += delta_y
