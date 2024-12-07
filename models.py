@@ -4,7 +4,7 @@ import random
 TRANSPARENT_COLOR = 2
 
 
-class Monster:
+class BaseMonster:
     def __init__(
         self,
         u,
@@ -20,74 +20,129 @@ class Monster:
         sp_attack,
         sp_difense,
         speed,
-        moves,
         compatibility,
     ):
         self.u, self.v, self.w, self.h = u, v, w, h
         self.name = name
         self.types = type1, type2
-        (
-            self.hp,
-            self.attack,
-            self.defense,
-            self.sp_attack,
-            self.sp_difense,
-            self.speed,
-        ) = (hp, attack, defense, sp_attack, sp_difense, speed)
-        self.hp_now = hp
-        self.moves = moves
+        self.hp = hp
+        self.attack = attack
+        self.defense = defense
+        self.sp_attack = sp_attack
+        self.sp_difense = sp_difense
+        self.speed = speed
         self.compatibility = compatibility
 
-    def draw_monster(self, x, y, scale, is_facing_right=False):
+
+class Monster:
+    def __init__(self, x, y, base_monster_instance, moves):
+        self.x, self.y = x, y
+        self.base_monster_instance = base_monster_instance
+        self.moves = moves
+        self.hp_now = base_monster_instance.hp
+
+    def draw_monster(self, scale, is_facing_right=False):
         # モンスターを描画
         if is_facing_right:
             pyxel.blt(
-                x,
-                y,
+                self.x,
+                self.y,
                 0,
-                self.u,
-                self.v,
-                self.w * (-1),
-                self.h,
+                self.base_monster_instance.u,
+                self.base_monster_instance.v,
+                self.base_monster_instance.w * (-1),
+                self.base_monster_instance.h,
                 TRANSPARENT_COLOR,
                 scale=scale,
             )
         else:
             pyxel.blt(
-                x, y, 0, self.u, self.v, self.w, self.h, TRANSPARENT_COLOR, scale=scale
+                self.x,
+                self.y,
+                0,
+                self.base_monster_instance.u,
+                self.base_monster_instance.v,
+                self.base_monster_instance.w,
+                self.base_monster_instance.h,
+                TRANSPARENT_COLOR,
+                scale=scale,
             )
 
-    def move(self, index, target):
-        info = self.moves[index].get_info()
-        if info["kind"] == "recover":
+    def get_result_of_move(self, move, target):
+        message = []
+        if move.kind == "recover":
             # 回復技のとき
-            self.hp_now += round(self.hp * 0.5, 0)
-            if self.hp_now > self.hp:
-                self.hp_now = self.hp
-        elif info["kind"] == "physical":
-            if info["accuracy"] > random.randint(1, 100):
+            recovery_points = round(self.base_monster_instance.hp * 0.5, 0)
+            if self.hp_now == self.base_monster_instance.hp:
+                result = self.hp_now
+                message.append("しかし体力は満タンだ！")
+            elif self.hp_now + recovery_points > self.base_monster_instance.hp:
+                # 最大HPを超えるとき
+                result = self.base_monster_instance.hp
+            else:
+                result = self.hp_now + recovery_points
+
+        elif move.kind == "physical":
+            # 物理技
+            if move.accuracy > random.randint(1, 100):
                 # 命中したとき
+                # 技の相性
+                compatibility = target.base_monster_instance.compatibility[move.type]
+                if compatibility > 1:
+                    message.append("効果は抜群だ！")
+                elif compatibility < 1:
+                    message.append("効果はいまひとつだ...")
+                # ダメージ
                 base_damage = round(
                     11
-                    * self.attack
-                    * info["power"]
-                    * self.compatibility[info["type"]]
-                    / (25 * target.defense),
+                    * self.base_monster_instance.attack
+                    * move.power
+                    * target.base_monster_instance.compatibility[move.type]
+                    / (25 * target.base_monster_instance.defense),
                     0,
                 )
-                target.hp_now -= base_damage * random.randint(85, 100) / 100
+                damage = base_damage * random.randint(85, 100) / 100
+                if target.hp_now < damage:
+                    # HPが負の値になるとき
+                    result = 0
+                    message.append(f"{target.base_monster_instance.name}はやられた")
+                else:
+                    result = target.hp_now - damage
+            else:
+                # 外れたとき
+                result = target.hp_now
+                message.append("しかし当たらなかった！")
         else:
-            if info["accuracy"] > random.randint(1, 100):
+            # 特殊技
+            if move.accuracy > random.randint(1, 100):
                 # 命中したとき
+                # 技の相性
+                compatibility = target.base_monster_instance.compatibility[move.type]
+                if compatibility > 1:
+                    message.append("効果は抜群だ！")
+                elif compatibility < 1:
+                    message.append("効果はいまひとつだ...")
+                # ダメージ
                 base_damage = round(
                     11
-                    * self.sp_attack
-                    * info["power"]
-                    * self.compatibility[info["type"]]
-                    / (25 * target.sp_defense),
+                    * self.base_monster_instance.sp_attack
+                    * move.power
+                    * target.base_monster_instance.compatibility[move.type]
+                    / (25 * target.base_monster_instance.sp_defense),
                     0,
                 )
-                target.hp_now -= base_damage * random.randint(85, 100) / 100
+                damage = base_damage * random.randint(85, 100) / 100
+                if target.hp_now < damage:
+                    # HPが負の値になるとき
+                    result = 0
+                    message.append(f"{target.base_monster_instance.name}はやられた")
+                else:
+                    result = target.hp_now - damage
+            else:
+                # 外れたとき
+                result = target.hp_now
+                message.append("しかし当たらなかった！")
+        return result, message
 
 
 class Move:
@@ -104,14 +159,6 @@ class PhysicalMove(Move):
         self.power = power
         self.accuracy = accuracy
 
-    def get_info(self):
-        return {
-            "kind": self.kind,
-            "type": self.type,
-            "power": self.power,
-            "accuracy": self.accuracy,
-        }
-
 
 class SpecialMove(Move):
     def __init__(self, name, description, type, power, accuracy):
@@ -120,22 +167,11 @@ class SpecialMove(Move):
         self.power = power
         self.accuracy = accuracy
 
-    def get_info(self):
-        return {
-            "kind": self.kind,
-            "type": self.type,
-            "power": self.power,
-            "accuracy": self.accuracy,
-        }
-
 
 class RecoverMove(Move):
     def __init__(self, name, description, type):
         super().__init__(name, description, type)
         self.kind = "recover"
-
-    def get_info(self):
-        return {"kind": self.kind}
 
 
 class SelectTriangle:
