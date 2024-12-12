@@ -263,8 +263,8 @@ class App:
     def draw(self):
         pyxel.cls(7)
         # 場に出ているモンスターを描画
-        self.my_monster_battling.draw_monster(4, True)
-        self.opponent_monster_battling.draw_monster(4)
+        self.my_monster_battling.draw_monster(True)
+        self.opponent_monster_battling.draw_monster()
         # モンスターの名前とHPを描画
         _draw_monster_name_and_hp(
             self.my_monster_battling, WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100

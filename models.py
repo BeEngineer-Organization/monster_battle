@@ -37,7 +37,7 @@ class Monster:
         self.moves = moves
         self.hp_now = base_monster_instance.hp
 
-    def draw_monster(self, scale, is_facing_right=False):
+    def draw_monster(self, is_facing_right=False):
         # モンスターを描画
         if is_facing_right:
             pyxel.blt(
@@ -49,7 +49,7 @@ class Monster:
                 self.base_monster_instance.w * (-1),
                 self.base_monster_instance.h,
                 TRANSPARENT_COLOR,
-                scale=scale,
+                scale=4,
             )
         else:
             pyxel.blt(
@@ -61,7 +61,7 @@ class Monster:
                 self.base_monster_instance.w,
                 self.base_monster_instance.h,
                 TRANSPARENT_COLOR,
-                scale=scale,
+                scale=4,
             )
 
     def get_result_of_move(self, move, target):
