@@ -2,20 +2,18 @@ from models import BaseMonster
 
 ALL_MONSTERS = [
     BaseMonster(
-        0,
-        17,
-        20,
-        17,
-        "フシギダネ",
-        "くさ",
-        "どく",
-        120,
-        69,
-        69,
-        85,
-        85,
-        65,
-        {
+        u=0,
+        v=17,
+        w=20,
+        h=17,
+        name="フシギダネ",
+        type1="くさ",
+        type2="どく",
+        hp=120,
+        attack=85,
+        defense=85,
+        speed=65,
+        compatibility={
             "ノーマル": 1,
             "ほのお": 2,
             "みず": 0.5,

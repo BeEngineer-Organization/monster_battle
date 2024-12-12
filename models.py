@@ -17,8 +17,6 @@ class BaseMonster:
         hp,
         attack,
         defense,
-        sp_attack,
-        sp_difense,
         speed,
         compatibility,
     ):
@@ -28,8 +26,6 @@ class BaseMonster:
         self.hp = hp
         self.attack = attack
         self.defense = defense
-        self.sp_attack = sp_attack
-        self.sp_difense = sp_difense
         self.speed = speed
         self.compatibility = compatibility
 
@@ -82,8 +78,8 @@ class Monster:
             else:
                 result = self.hp_now + recovery_points
 
-        elif move.kind == "physical":
-            # 物理技
+        else:
+            # 攻撃技
             if move.accuracy > random.randint(1, 100):
                 # 命中したとき
                 # 技の相性
@@ -112,36 +108,6 @@ class Monster:
                 # 外れたとき
                 result = target.hp_now
                 message.append("しかし当たらなかった！")
-        else:
-            # 特殊技
-            if move.accuracy > random.randint(1, 100):
-                # 命中したとき
-                # 技の相性
-                compatibility = target.base_monster_instance.compatibility[move.type]
-                if compatibility > 1:
-                    message.append("効果は抜群だ！")
-                elif compatibility < 1:
-                    message.append("効果はいまひとつだ...")
-                # ダメージ
-                base_damage = round(
-                    11
-                    * self.base_monster_instance.sp_attack
-                    * move.power
-                    * target.base_monster_instance.compatibility[move.type]
-                    / (25 * target.base_monster_instance.sp_defense),
-                    0,
-                )
-                damage = base_damage * random.randint(85, 100) / 100
-                if target.hp_now < damage:
-                    # HPが負の値になるとき
-                    result = 0
-                    message.append(f"{target.base_monster_instance.name}はやられた")
-                else:
-                    result = target.hp_now - damage
-            else:
-                # 外れたとき
-                result = target.hp_now
-                message.append("しかし当たらなかった！")
         return result, message
 
 
@@ -152,18 +118,10 @@ class Move:
         self.type = type
 
 
-class PhysicalMove(Move):
+class AttackMove(Move):
     def __init__(self, name, description, type, power, accuracy):
         super().__init__(name, description, type)
-        self.kind = "physical"
-        self.power = power
-        self.accuracy = accuracy
-
-
-class SpecialMove(Move):
-    def __init__(self, name, description, type, power, accuracy):
-        super().__init__(name, description, type)
-        self.kind = "special"
+        self.kind = "attack"
         self.power = power
         self.accuracy = accuracy
 

@@ -1,6 +1,6 @@
-from models import RecoverMove, SpecialMove, PhysicalMove
+from models import RecoverMove, AttackMove
 
 ALL_MOVES = [
-    PhysicalMove("つるのむち", "", "くさ", 45, 100),
-    RecoverMove("こうごうせい", "HPを半分回復する", "くさ"),
+    AttackMove(name="つるのむち", description="", type="くさ", power=45, accuracy=100),
+    RecoverMove(name="こうごうせい", description="HPを半分回復する", type="くさ"),
 ]

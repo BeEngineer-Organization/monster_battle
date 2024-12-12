@@ -146,13 +146,13 @@ class App:
                 try:
                     # プレイヤーの行動
                     my_action = {
-                        "am_i": True,
+                        "is_player": True,
                         "monster": self.my_monster_battling,
                         "move": self.my_monster_battling.moves[index],
                     }
                     # 相手の行動
                     opponent_action = {
-                        "am_i": False,
+                        "is_player": False,
                         "monster": self.opponent_monster_battling,
                         "move": self.opponent_monster_battling.moves[
                             random.randint(0, len(self.opponent_monster_battling.moves))
@@ -190,7 +190,7 @@ class App:
 
     # 技シーン
     def update_move_scene(self):
-        if self.action["am_i"]:
+        if self.action["is_player"]:
             # 自分のモンスターの行動
             if self.action["move"].kind == "recover":
                 # 回復
@@ -234,7 +234,7 @@ class App:
     def update_move_effect_scene(self):
         if self.action["move"].kind == "recover":
             # 回復技のとき
-            if self.action["am_i"]:
+            if self.action["is_player"]:
                 if self.my_monster_battling.hp_now < self.result:
                     self.my_monster_battling.hp_now += 1
                     return
@@ -244,7 +244,7 @@ class App:
                     return
         else:
             # 攻撃技のとき
-            if self.action["am_i"]:
+            if self.action["is_player"]:
                 if self.opponent_monster_battling.hp_now > self.result:
                     self.opponent_monster_battling.hp_now -= 1
                     return
@@ -350,7 +350,7 @@ class App:
             return
 
         # 技のメッセージを描画
-        if self.action["am_i"]:
+        if self.action["is_player"]:
             # 自分の行動のとき
             WRITER.draw(
                 MESSAGE_X,
@@ -372,7 +372,7 @@ class App:
     # 技シーン
     def draw_move_scene(self):
         # 技のメッセージを描画
-        if self.action["am_i"]:
+        if self.action["is_player"]:
             # 自分の行動のとき
             WRITER.draw(
                 MESSAGE_X,
@@ -394,7 +394,7 @@ class App:
     # 技結果シーン
     def draw_move_effect_scene(self):
         # 技のメッセージを描画
-        if self.action["am_i"]:
+        if self.action["is_player"]:
             # 自分の行動のとき
             WRITER.draw(
                 MESSAGE_X,
@@ -416,7 +416,7 @@ class App:
     # 技後シーン
     def draw_after_move_scene(self):
         # 技のメッセージを描画
-        if self.action["am_i"]:
+        if self.action["is_player"]:
             # 自分の行動のとき
             WRITER.draw(
                 MESSAGE_X,
