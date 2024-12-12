@@ -68,7 +68,7 @@ class Monster:
         message = []
         if move.kind == "recover":
             # 回復技のとき
-            recovery_points = round(self.base_monster_instance.hp * 0.5, 0)
+            recovery_points = round(self.base_monster_instance.hp * 0.5)
             if self.hp_now == self.base_monster_instance.hp:
                 result = self.hp_now
                 message.append("しかし体力は満タンだ！")
@@ -80,7 +80,7 @@ class Monster:
 
         else:
             # 攻撃技
-            if move.accuracy > random.randint(1, 100):
+            if move.accuracy > random.randrange(99):
                 # 命中したとき
                 # 技の相性
                 compatibility = target.base_monster_instance.compatibility[move.type]
@@ -94,10 +94,9 @@ class Monster:
                     * self.base_monster_instance.attack
                     * move.power
                     * target.base_monster_instance.compatibility[move.type]
-                    / (25 * target.base_monster_instance.defense),
-                    0,
+                    / (25 * target.base_monster_instance.defense)
                 )
-                damage = base_damage * random.randint(85, 100) / 100
+                damage = round(base_damage * random.randint(85, 100) / 100)
                 if target.hp_now < damage:
                     # HPが負の値になるとき
                     result = 0

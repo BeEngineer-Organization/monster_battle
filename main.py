@@ -25,6 +25,10 @@ for i in range(5):
     MESSAGE_Y.append(HEIGHT * 0.66 + i * DELTA_MESSAGE_Y)
 MESSAGE_FONT_SIZE = 16
 
+MY_MONSTER_X = WIDTH * 0.25
+OPPONENT_MONSTER_X = WIDTH * 0.75
+MONSTER_Y = HEIGHT * 0.33
+
 
 def _draw_monster_name_and_hp(monster, x, y, is_visible=True):
     # 名前を描画
@@ -66,16 +70,16 @@ class App:
         # 手持ちのモンスター
         self.my_monsters = [
             Monster(
-                WIDTH * 0.33,
-                HEIGHT * 0.4,
-                ALL_MONSTERS[0],
+                MY_MONSTER_X,
+                MONSTER_Y,
+                ALL_MONSTERS[2],
                 [ALL_MOVES[0], ALL_MOVES[1]],
             )
         ]
         self.opponent_monsters = [
             Monster(
-                WIDTH * 0.66,
-                HEIGHT * 0.4,
+                OPPONENT_MONSTER_X,
+                MONSTER_Y,
                 ALL_MONSTERS[0],
                 [ALL_MOVES[0], ALL_MOVES[1]],
             )
@@ -155,7 +159,7 @@ class App:
                         "is_player": False,
                         "monster": self.opponent_monster_battling,
                         "move": self.opponent_monster_battling.moves[
-                            random.randint(0, len(self.opponent_monster_battling.moves))
+                            random.randrange(len(self.opponent_monster_battling.moves))
                         ],
                     }
                     # 素早さの差を取得
@@ -170,7 +174,7 @@ class App:
                         self.actions = [opponent_action, my_action]
                     else:
                         # 素早さが同じだと50%で決まる
-                        if random.randint(0, 1) == 0:
+                        if random.randrange(1) == 0:
                             self.actions = [my_action, opponent_action]
                         else:
                             self.actions = [opponent_action, my_action]
@@ -197,18 +201,17 @@ class App:
                 time.sleep(0.5)
             else:
                 # 攻撃
-                if self.my_monster_battling.x < WIDTH * 0.4:
-                    self.my_monster_battling.x = WIDTH * 0.4
+                if self.my_monster_battling.x < MY_MONSTER_X + 50:
+                    self.my_monster_battling.x = MY_MONSTER_X + 50
                     return
-                elif self.my_monster_battling.x == WIDTH * 0.4:
-                    self.my_monster_battling.x = WIDTH * 0.33
+                elif self.my_monster_battling.x == MY_MONSTER_X + 50:
+                    self.my_monster_battling.x = MY_MONSTER_X
             # 技の結果
-            result, message = self.opponent_monster_battling.get_result_of_move(
-                self.action["move"], self.my_monster_battling
+            result, message = self.my_monster_battling.get_result_of_move(
+                self.action["move"], self.opponent_monster_battling
             )
             self.result = result
             self.message = message
-
         else:
             # 相手のモンスターの行動
             if self.action["move"].kind == "recover":
@@ -216,11 +219,11 @@ class App:
                 time.sleep(0.5)
             else:
                 # 攻撃
-                if self.opponent_monster_battling.x > WIDTH * 0.6:
-                    self.opponent_monster_battling.x = WIDTH * 0.6
+                if self.opponent_monster_battling.x > OPPONENT_MONSTER_X - 50:
+                    self.opponent_monster_battling.x = OPPONENT_MONSTER_X - 50
                     return
-                elif self.opponent_monster_battling.x == WIDTH * 0.6:
-                    self.opponent_monster_battling.x = WIDTH * 0.66
+                elif self.opponent_monster_battling.x == OPPONENT_MONSTER_X - 50:
+                    self.opponent_monster_battling.x = OPPONENT_MONSTER_X
             # 技の結果
             result, message = self.opponent_monster_battling.get_result_of_move(
                 self.action["move"], self.my_monster_battling
@@ -267,12 +270,12 @@ class App:
         self.opponent_monster_battling.draw_monster()
         # モンスターの名前とHPを描画
         _draw_monster_name_and_hp(
-            self.my_monster_battling, WIDTH * 0.33 - 40, HEIGHT * 0.33 - 100
+            self.my_monster_battling, MY_MONSTER_X - 32, MONSTER_Y - 80
         )
         _draw_monster_name_and_hp(
             self.opponent_monster_battling,
-            WIDTH * 0.66 - 40,
-            HEIGHT * 0.33 - 100,
+            OPPONENT_MONSTER_X - 32,
+            MONSTER_Y - 80,
             is_visible=False,
         )
         # メッセージ表示枠を描画
@@ -310,19 +313,11 @@ class App:
         # 技の選択肢を描画
         counter = 0
         for move in self.my_monster_battling.moves:
-            if move.kind == "physical":
+            if move.kind == "recover":
                 WRITER.draw(
                     MESSAGE_X + 20,
                     MESSAGE_Y[counter],
-                    f"{move.name}  分類:物理 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}",
-                    MESSAGE_FONT_SIZE,
-                    0,
-                )
-            elif move.kind == "special":
-                WRITER.draw(
-                    MESSAGE_X + 20,
-                    MESSAGE_Y[counter],
-                    f"{move.name}  分類:特殊 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}",
+                    f"{move.name}  分類:回復 タイプ:{move.type} {move.description}",
                     MESSAGE_FONT_SIZE,
                     0,
                 )
@@ -330,7 +325,7 @@ class App:
                 WRITER.draw(
                     MESSAGE_X + 20,
                     MESSAGE_Y[counter],
-                    f"{move.name}  分類:回復 タイプ:{move.type} {move.description}",
+                    f"{move.name}  分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}",
                     MESSAGE_FONT_SIZE,
                     0,
                 )
