@@ -21,6 +21,7 @@ MOVE_HP_SCENE = 5
 MOVE_MESSAGE_SCENE = 6
 PLAYER_PUT_SCENE = 7
 OPPONENT_PUT_SCENE = 8
+WIN_SCENE = 9
 
 MESSAGE_X = 40
 SELECTED_MESSAGE_X = MESSAGE_X + 20
@@ -129,19 +130,19 @@ class App:
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
                     base_monster_instance=ALL_MONSTERS[0],
-                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
                     base_monster_instance=ALL_MONSTERS[3],
-                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
                     base_monster_instance=ALL_MONSTERS[6],
-                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
                 ),
             ]
         # 相手のモンスター
@@ -149,9 +150,21 @@ class App:
             Monster(
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
-                base_monster_instance=ALL_MONSTERS[11],
-                moves=[ALL_MOVES[2]],
-            )
+                base_monster_instance=ALL_MONSTERS[random.choice([0, 3, 6, 9])],
+                moves=[ALL_MOVES[0]],
+            ),
+            Monster(
+                x=OPPONENT_MONSTER_X,
+                y=MONSTER_Y,
+                base_monster_instance=ALL_MONSTERS[random.choice([1, 4, 7, 10])],
+                moves=[ALL_MOVES[0]],
+            ),
+            Monster(
+                x=OPPONENT_MONSTER_X,
+                y=MONSTER_Y,
+                base_monster_instance=ALL_MONSTERS[random.choice([2, 5, 8, 11, 12])],
+                moves=[ALL_MOVES[0]],
+            ),
         ]
         # 場に出ているモンスター
         self.my_monster_battling = self.my_monsters[0]
@@ -202,6 +215,9 @@ class App:
         elif self.scene == MOVE_MESSAGE_SCENE:
             # 技メッセージシーン
             self.update_move_message_scene()
+        elif self.scene == WIN_SCENE:
+            # 勝利シーン
+            self.update_win_scene()
 
     def draw(self):
         pyxel.cls(7)
@@ -232,6 +248,9 @@ class App:
         elif self.scene == MOVE_MESSAGE_SCENE:
             # 技メッセージシーン
             self.draw_move_message_scene()
+        elif self.scene == WIN_SCENE:
+            # 勝利シーン
+            self.draw_win_scene()
 
     # 行動選択シーン
     def update_select_action_scene(self):
@@ -550,6 +569,19 @@ class App:
                 # モンスター選択シーンに移動
                 self.select_triangle.reset(MESSAGE_Y[2])
                 self.scene = SELECT_MONSTER_SCENE
+        # 相手のモンスターのHPが無くなったとき
+        elif self.opponent_monster_battling.hp_now == 0:
+            if (
+                self.opponent_monsters[0].hp_now
+                + self.opponent_monsters[0].hp_now
+                + self.opponent_monsters[0].hp_now
+                == 0
+            ):
+                self.scene = WIN_SCENE
+            else:
+                self.my_monster_battling.win_count += 1
+                # 相手が場に出すシーンに移動
+                self.scene = OPPONENT_PUT_SCENE
         else:
             # 技名シーンに移動
             self.scene = MOVE_NAME_SCENE
@@ -590,6 +622,7 @@ class App:
     # 相手が場に出すシーン
     def update_opponent_put_scene(self):
         time.sleep(1)
+        self.select_triangle.reset(MESSAGE_Y[1])
         self.scene = SELECT_ACTION_SCENE
 
     def draw_opponent_put_scene(self):
@@ -598,29 +631,35 @@ class App:
             f"相手は{self.opponent_monster_battling.base_monster_instance.name}を繰り出した！"
         )
 
+    # 勝利シーン
+    def update_win_scene(self):
+        time.sleep(1)
+        self.save()
+        sys.exit()
+
+    def draw_win_scene(self):
+        self.draw_objects()
+        _draw_message("相手に勝利した！")
+
     # オブジェクト描画を管理する関数
-    def draw_objects(
-        self, my_monster_is_displayed=True, opponent_monster_is_displayed=True
-    ):
+    def draw_objects(self):
         # メッセージ描画枠を描画
         pyxel.rectb(15, HEIGHT * 0.66 - 15, WIDTH - 30, HEIGHT * 0.33, 0)
-        if my_monster_is_displayed:
-            # 場に出ているプレイヤーのモンスターを描画
-            self.my_monster_battling.draw_monster(True)
-            # モンスターの名前とHPを描画
-            _draw_monster_name_and_hp(
-                self.my_monster_battling, MY_MONSTER_X - 32, MONSTER_Y - 80
-            )
-        if opponent_monster_is_displayed:
-            # 場に出ている相手モンスターを描画
-            self.opponent_monster_battling.draw_monster()
-            # モンスターの名前とHPを描画
-            _draw_monster_name_and_hp(
-                self.opponent_monster_battling,
-                OPPONENT_MONSTER_X - 32,
-                MONSTER_Y - 80,
-                is_visible=False,
-            )
+        # 場に出ているプレイヤーのモンスターを描画
+        self.my_monster_battling.draw_monster(True)
+        # モンスターの名前とHPを描画
+        _draw_monster_name_and_hp(
+            self.my_monster_battling, MY_MONSTER_X - 32, MONSTER_Y - 80
+        )
+        # 場に出ている相手モンスターを描画
+        self.opponent_monster_battling.draw_monster()
+        # モンスターの名前とHPを描画
+        _draw_monster_name_and_hp(
+            self.opponent_monster_battling,
+            OPPONENT_MONSTER_X - 32,
+            MONSTER_Y - 80,
+            is_visible=False,
+        )
 
 
 App()
