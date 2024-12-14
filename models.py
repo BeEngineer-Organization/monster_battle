@@ -84,6 +84,10 @@ class Monster:
                 # 命中したとき
                 # 技の相性
                 compatibility = target.base_monster_instance.compatibility[move.type]
+                if move.type == self.type1 or self.type2:
+                    type_match = 1.5
+                else:
+                    type_match = 1
                 if compatibility > 1:
                     message.append("効果は抜群だ！")
                 elif compatibility < 1:
@@ -93,6 +97,7 @@ class Monster:
                     11
                     * self.base_monster_instance.attack
                     * move.power
+                    * type_match
                     * target.base_monster_instance.compatibility[move.type]
                     / (25 * target.base_monster_instance.defense)
                 )

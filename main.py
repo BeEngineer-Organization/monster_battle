@@ -72,7 +72,7 @@ class App:
             Monster(
                 MY_MONSTER_X,
                 MONSTER_Y,
-                ALL_MONSTERS[2],
+                ALL_MONSTERS[12],
                 [ALL_MOVES[0], ALL_MOVES[1]],
             )
         ]
@@ -80,7 +80,7 @@ class App:
             Monster(
                 OPPONENT_MONSTER_X,
                 MONSTER_Y,
-                ALL_MONSTERS[0],
+                ALL_MONSTERS[11],
                 [ALL_MOVES[0], ALL_MOVES[1]],
             )
         ]
