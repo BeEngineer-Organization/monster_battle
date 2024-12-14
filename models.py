@@ -22,7 +22,8 @@ class BaseMonster:
     ):
         self.u, self.v, self.w, self.h = u, v, w, h
         self.name = name
-        self.types = type1, type2
+        self.type1 = type1
+        self.type2 = type2
         self.hp = hp
         self.attack = attack
         self.defense = defense
@@ -84,7 +85,10 @@ class Monster:
                 # 命中したとき
                 # 技の相性
                 compatibility = target.base_monster_instance.compatibility[move.type]
-                if move.type == self.type1 or self.type2:
+                if (
+                    move.type == self.base_monster_instance.type1
+                    or self.base_monster_instance.type2
+                ):
                     type_match = 1.5
                 else:
                     type_match = 1

@@ -2,6 +2,7 @@ import pyxel
 import PyxelUniversalFont as puf
 import random
 import time
+import sys
 
 from models import Monster, SelectTriangle
 from monsters import ALL_MONSTERS
@@ -12,13 +13,16 @@ WRITER = puf.Writer("misaki_gothic.ttf")
 
 SELECT_ACTION_SCENE = 0
 SELECT_MOVE_SCENE = 1
-BEFORE_MOVE_SCENE = 2
-MOVE_SCENE = 3
-MOVE_EFFECT_SCENE = 4
-AFTER_MOVE_SCENE = 5
-SELECT_MONSTER_SCENE = 6
+SELECT_MONSTER_SCENE = 2
+MOVE_NAME_SCENE = 3
+MOVE_SCENE = 4
+MOVE_HP_SCENE = 5
+MOVE_MESSAGE_SCENE = 6
+PLAYER_PUT_SCENE = 7
+OPPONENT_PUT_SCENE = 8
 
 MESSAGE_X = 40
+SELECTED_MESSAGE_X = MESSAGE_X + 20
 DELTA_MESSAGE_Y = 22
 MESSAGE_Y = []
 for i in range(5):
@@ -30,11 +34,14 @@ OPPONENT_MONSTER_X = WIDTH * 0.75
 MONSTER_Y = HEIGHT * 0.33
 
 
+# モンスター名とHPバーを描画する関数
 def _draw_monster_name_and_hp(monster, x, y, is_visible=True):
     # 名前を描画
     WRITER.draw(x, y, monster.base_monster_instance.name, 16, 0)
     # HPバーを描画
+    # 最大HP
     pyxel.rect(x, y + 20, 100, 10, 0)
+    # 現在HP
     hp_ratio = monster.hp_now / monster.base_monster_instance.hp
     if hp_ratio < 0.25:
         # HPが1/4未満のとき赤色
@@ -56,13 +63,41 @@ def _draw_monster_name_and_hp(monster, x, y, is_visible=True):
         )
 
 
+# 選択肢を描画する関数
+def _draw_choices(choices):
+    counter = 0
+    for choice in choices:
+        WRITER.draw(
+            SELECTED_MESSAGE_X,
+            MESSAGE_Y[counter],
+            choice,
+            MESSAGE_FONT_SIZE,
+            0,
+        )
+        counter += 1
+
+
+# メッセージを描画する関数
+def _draw_message(message, y=0):
+    WRITER.draw(
+        MESSAGE_X,
+        MESSAGE_Y[y],
+        message,
+        MESSAGE_FONT_SIZE,
+        0,
+    )
+
+
 class App:
     def __init__(self):
         pyxel.init(WIDTH, HEIGHT)
         pyxel.load("./resource.pyxres")
         self.scene = SELECT_ACTION_SCENE
         self.select_triangle = SelectTriangle(
-            MESSAGE_X, MESSAGE_Y[0], DELTA_MESSAGE_Y, MESSAGE_Y[1]
+            base_x=MESSAGE_X,
+            base_y=MESSAGE_Y[0],
+            delta_y=DELTA_MESSAGE_Y,
+            y1_max=MESSAGE_Y[1],
         )
         self.game_settings()
 
@@ -72,16 +107,28 @@ class App:
             Monster(
                 MY_MONSTER_X,
                 MONSTER_Y,
-                ALL_MONSTERS[12],
+                ALL_MONSTERS[0],
                 [ALL_MOVES[0], ALL_MOVES[1]],
-            )
+            ),
+            Monster(
+                MY_MONSTER_X,
+                MONSTER_Y,
+                ALL_MONSTERS[3],
+                [ALL_MOVES[0], ALL_MOVES[1]],
+            ),
+            Monster(
+                MY_MONSTER_X,
+                MONSTER_Y,
+                ALL_MONSTERS[6],
+                [ALL_MOVES[0], ALL_MOVES[1]],
+            ),
         ]
         self.opponent_monsters = [
             Monster(
                 OPPONENT_MONSTER_X,
                 MONSTER_Y,
-                ALL_MONSTERS[11],
-                [ALL_MOVES[0], ALL_MOVES[1]],
+                ALL_MONSTERS[2],
+                [ALL_MOVES[0]],
             )
         ]
         # 場に出ているモンスター
@@ -96,18 +143,57 @@ class App:
         elif self.scene == SELECT_MOVE_SCENE:
             # 技選択シーン
             self.update_select_move_scene()
-        elif self.scene == BEFORE_MOVE_SCENE:
+        elif self.scene == SELECT_MONSTER_SCENE:
+            # モンスター選択シーン
+            self.update_select_monster_scene()
+        elif self.scene == PLAYER_PUT_SCENE:
+            # 自分が場に出すシーン
+            self.update_player_put_scene()
+        elif self.scene == OPPONENT_PUT_SCENE:
+            # 相手が場に出すシーン
+            self.update_opponent_put_scene()
+        elif self.scene == MOVE_NAME_SCENE:
             # 技前シーン
-            self.update_before_move_scene()
+            self.update_move_name_scene()
         elif self.scene == MOVE_SCENE:
             # 技シーン
             self.update_move_scene()
-        elif self.scene == MOVE_EFFECT_SCENE:
-            # 技結果シーン
-            self.update_move_effect_scene()
-        elif self.scene == AFTER_MOVE_SCENE:
-            # 技後シーン
-            self.update_after_move_scene()
+        elif self.scene == MOVE_HP_SCENE:
+            # 技によるHP処理シーン
+            self.update_move_hp_scene()
+        elif self.scene == MOVE_MESSAGE_SCENE:
+            # 技メッセージシーン
+            self.update_move_message_scene()
+
+    def draw(self):
+        pyxel.cls(7)
+        if self.scene == SELECT_ACTION_SCENE:
+            # 行動選択シーン
+            self.draw_select_action_scene()
+        elif self.scene == SELECT_MOVE_SCENE:
+            # 技選択シーン
+            self.draw_select_move_scene()
+        elif self.scene == SELECT_MONSTER_SCENE:
+            # モンスター選択シーン
+            self.draw_select_monster_scene()
+        elif self.scene == OPPONENT_PUT_SCENE:
+            # 相手が場に出すシーン
+            self.draw_opponent_put_scene()
+        elif self.scene == PLAYER_PUT_SCENE:
+            # 自分が場に出すシーン
+            self.draw_player_put_scene()
+        elif self.scene == MOVE_NAME_SCENE:
+            # 技前シーン
+            self.draw_move_name_scene()
+        elif self.scene == MOVE_SCENE:
+            # 技シーン
+            self.draw_move_scene()
+        elif self.scene == MOVE_HP_SCENE:
+            # 技によるHP処理シーン
+            self.draw_move_hp_scene()
+        elif self.scene == MOVE_MESSAGE_SCENE:
+            # 技メッセージシーン
+            self.draw_move_message_scene()
 
     # 行動選択シーン
     def update_select_action_scene(self):
@@ -127,7 +213,16 @@ class App:
                 self.scene = SELECT_MOVE_SCENE
             elif self.select_triangle.y1 == MESSAGE_Y[1]:
                 # モンスター選択シーンに移動
+                self.select_triangle.reset(MESSAGE_Y[4])
                 self.scene = SELECT_MONSTER_SCENE
+
+    def draw_select_action_scene(self):
+        # オブジェクトを描画
+        self.draw_objects()
+        # 行動の選択肢を描画
+        _draw_choices(["たたかう", "モンスター"])
+        # 矢印の描画
+        self.select_triangle.draw()
 
     # 技選択シーン
     def update_select_move_scene(self):
@@ -142,7 +237,7 @@ class App:
         elif pyxel.btnr(pyxel.KEY_SPACE):
             # スペースボタンが離されるとき
             if self.select_triangle.y1 == MESSAGE_Y[4]:
-                # 技選択シーンに戻る
+                # 行動選択シーンに戻る
                 self.select_triangle.reset(MESSAGE_Y[1])
                 self.scene = SELECT_ACTION_SCENE
             else:
@@ -180,17 +275,131 @@ class App:
                             self.actions = [opponent_action, my_action]
                     # 技前シーンに移動
                     self.select_triangle.reset(MESSAGE_Y[1])
-                    self.scene = BEFORE_MOVE_SCENE
+                    self.scene = MOVE_NAME_SCENE
 
                 except IndexError:
                     # 選択した技がないとき
                     return
 
-    # 技前シーン
-    def update_before_move_scene(self):
+    def draw_select_move_scene(self):
+        # オブジェクトを描画
+        self.draw_objects()
+        # 選択肢として描画する情報
+        choices = []
+        for move in self.my_monster_battling.moves:
+            if move.kind == "recover":
+                choices.append(
+                    f"{move.name} 分類:回復 タイプ:{move.type} {move.description}"
+                )
+            else:
+                choices.append(
+                    f"{move.name} 分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}"
+                )
+        # 技の選択肢を描画
+        _draw_choices(choices)
+        # 「戻る」を描画
+        WRITER.draw(SELECTED_MESSAGE_X, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0)
+        # 矢印の描画
+        self.select_triangle.draw()
+
+    # モンスター選択シーン
+    def update_select_monster_scene(self):
+        if pyxel.btnr(pyxel.KEY_UP):
+            # 上ボタンが離されるとき
+            self.select_triangle.select(is_up=True)
+
+        elif pyxel.btnr(pyxel.KEY_DOWN):
+            # 下ボタンが離されるとき
+            self.select_triangle.select()
+
+        elif pyxel.btnr(pyxel.KEY_SPACE):
+            # スペースボタンが離されるとき
+            if self.select_triangle.y1 == MESSAGE_Y[4]:
+                # 技選択シーンに戻る
+                self.select_triangle.reset(MESSAGE_Y[1])
+                self.scene = SELECT_ACTION_SCENE
+            else:
+                index = MESSAGE_Y.index(self.select_triangle.y1)
+                try:
+                    # 選択したモンスターがすでに場に出ているとき、または選択したモンスターのHPが0のとき
+                    if (
+                        self.my_monsters[index] == self.my_monster_battling
+                        or self.my_monsters[index].hp_now == 0
+                    ):
+                        return
+                    else:
+                        if self.my_monster_battling.hp_now == 0:
+                            self.my_monster_battling = self.my_monsters[index]
+                            self.actions = []
+                            self.scene = PLAYER_PUT_SCENE
+                        else:
+                            self.my_monster_battling = self.my_monsters[index]
+                            # 自分が場に出すシーンに移動
+                            opponent_action = {
+                                "is_player": False,
+                                "monster": self.opponent_monster_battling,
+                                "move": self.opponent_monster_battling.moves[
+                                    random.randrange(
+                                        len(self.opponent_monster_battling.moves)
+                                    )
+                                ],
+                            }
+                            self.actions = [opponent_action]
+                            self.select_triangle.reset(MESSAGE_Y[1])
+                            self.scene = PLAYER_PUT_SCENE
+
+                except IndexError:
+                    # 選択したモンスターがいないとき
+                    return
+
+    def draw_select_monster_scene(self):
+        self.draw_objects()
+        # 選択肢として描画する情報
+        choices = []
+        for monster in self.my_monsters:
+            move_names = " ".join([move.name for move in monster.moves])
+            choices.append(
+                f"{monster.base_monster_instance.name} {monster.hp_now}/{monster.base_monster_instance.hp} {move_names}"
+            )
+        # 技の選択肢を描画
+        _draw_choices(choices)
+        if self.my_monster_battling.hp_now > 0:
+            # 自分の場に出ているモンスターが戦えるとき、「戻る」を描画
+            WRITER.draw(
+                SELECTED_MESSAGE_X, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0
+            )
+        # 矢印の描画
+        self.select_triangle.draw()
+
+    # 技名シーン
+    def update_move_name_scene(self):
         time.sleep(1)
         # 技シーンに移動
         self.scene = MOVE_SCENE
+
+    # 技名シーン
+    def draw_move_name_scene(self):
+        self.draw_objects()
+        try:
+            # 順に行動する
+            self.action = self.actions.pop(0)
+        except IndexError:
+            # 残っている行動がなくなれば次の行動選択シーンに移動
+            self.select_triangle.reset(MESSAGE_Y[1])
+            self.scene = SELECT_ACTION_SCENE
+            return
+
+        # 技のメッセージを描画
+        if self.action["is_player"]:
+            # 自分の行動のとき
+            _draw_message(
+                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
+        else:
+            # 相手の行動のとき
+            _draw_message(
+                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
 
     # 技シーン
     def update_move_scene(self):
@@ -230,11 +439,25 @@ class App:
             )
             self.result = result
             self.message = message
-        # 技シーンに移動
-        self.scene = MOVE_EFFECT_SCENE
+        # 技によるHP処理シーンに移動
+        self.scene = MOVE_HP_SCENE
 
-    # 技結果シーン
-    def update_move_effect_scene(self):
+    def draw_move_scene(self):
+        self.draw_objects()
+        # 技のメッセージを描画
+        if self.action["is_player"]:
+            # 自分の行動のとき
+            _draw_message(
+                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
+        else:
+            # 相手の行動のとき
+            _draw_message(
+                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
+
+    # 技によるHP処理シーン
+    def update_move_hp_scene(self):
         if self.action["move"].kind == "recover":
             # 回復技のとき
             if self.action["is_player"]:
@@ -255,200 +478,110 @@ class App:
                 if self.my_monster_battling.hp_now > self.result:
                     self.my_monster_battling.hp_now -= 1
                     return
-        self.scene = AFTER_MOVE_SCENE
+        self.scene = MOVE_MESSAGE_SCENE
 
-    # 技後シーン
-    def update_after_move_scene(self):
-        time.sleep(2)
-        # 技前シーンに移動
-        self.scene = BEFORE_MOVE_SCENE
+    def draw_move_hp_scene(self):
+        self.draw_objects()
+        # 技のメッセージを描画
+        if self.action["is_player"]:
+            # 自分の行動のとき
+            _draw_message(
+                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
+        else:
+            # 相手の行動のとき
+            _draw_message(
+                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+            )
 
-    def draw(self):
-        pyxel.cls(7)
-        # 場に出ているモンスターを描画
-        self.my_monster_battling.draw_monster(True)
-        self.opponent_monster_battling.draw_monster()
-        # モンスターの名前とHPを描画
-        _draw_monster_name_and_hp(
-            self.my_monster_battling, MY_MONSTER_X - 32, MONSTER_Y - 80
-        )
-        _draw_monster_name_and_hp(
-            self.opponent_monster_battling,
-            OPPONENT_MONSTER_X - 32,
-            MONSTER_Y - 80,
-            is_visible=False,
-        )
-        # メッセージ表示枠を描画
-        pyxel.rectb(15, HEIGHT * 0.66 - 15, WIDTH - 30, HEIGHT * 0.33, 0)
-
-        if self.scene == SELECT_ACTION_SCENE:
-            # 行動選択シーン
-            self.draw_select_action_scene()
-        elif self.scene == SELECT_MOVE_SCENE:
-            # 技選択シーン
-            self.draw_select_move_scene()
-        elif self.scene == BEFORE_MOVE_SCENE:
-            # 技前シーン
-            self.draw_before_move_scene()
-        elif self.scene == MOVE_SCENE:
-            # 技シーン
-            self.draw_move_scene()
-        elif self.scene == MOVE_EFFECT_SCENE:
-            # 技結果シーン
-            self.draw_move_effect_scene()
-        elif self.scene == AFTER_MOVE_SCENE:
-            # 技後シーン
-            self.draw_after_move_scene()
-
-    # 行動選択シーン
-    def draw_select_action_scene(self):
-        # 行動の選択肢を描画
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[0], "たたかう", MESSAGE_FONT_SIZE, 0)
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[1], "モンスター", MESSAGE_FONT_SIZE, 0)
-        # 矢印の描画
-        self.select_triangle.draw()
-
-    # 技選択シーン
-    def draw_select_move_scene(self):
-        # 技の選択肢を描画
-        counter = 0
-        for move in self.my_monster_battling.moves:
-            if move.kind == "recover":
-                WRITER.draw(
-                    MESSAGE_X + 20,
-                    MESSAGE_Y[counter],
-                    f"{move.name}  分類:回復 タイプ:{move.type} {move.description}",
-                    MESSAGE_FONT_SIZE,
-                    0,
-                )
+    # 技メッセージシーン
+    def update_move_message_scene(self):
+        time.sleep(1.5)
+        # 自分のモンスターのHPがなくなったとき
+        if self.my_monster_battling.hp_now == 0:
+            # 全滅したら終了
+            if (
+                self.my_monsters[0].hp_now
+                + self.my_monsters[1].hp_now
+                + self.my_monsters[2].hp_now
+                == 0
+            ):
+                sys.exit()
             else:
-                WRITER.draw(
-                    MESSAGE_X + 20,
-                    MESSAGE_Y[counter],
-                    f"{move.name}  分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}",
-                    MESSAGE_FONT_SIZE,
-                    0,
-                )
-            counter += 1
-        WRITER.draw(MESSAGE_X + 20, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0)
-        # 矢印の描画
-        self.select_triangle.draw()
-
-    # 技前シーン
-    def draw_before_move_scene(self):
-        try:
-            # 順に行動する
-            self.action = self.actions.pop(0)
-        except IndexError:
-            # 残っている行動がなくなれば次の行動選択シーンに移動
-            self.scene = SELECT_ACTION_SCENE
-            return
-
-        # 技のメッセージを描画
-        if self.action["is_player"]:
-            # 自分の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
+                # モンスター選択シーンに移動
+                self.select_triangle.reset(MESSAGE_Y[2])
+                self.scene = SELECT_MONSTER_SCENE
         else:
-            # 相手の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
+            # 技名シーンに移動
+            self.scene = MOVE_NAME_SCENE
 
-    # 技シーン
-    def draw_move_scene(self):
+    def draw_move_message_scene(self):
+        self.draw_objects()
         # 技のメッセージを描画
         if self.action["is_player"]:
             # 自分の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
-        else:
-            # 相手の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
-
-    # 技結果シーン
-    def draw_move_effect_scene(self):
-        # 技のメッセージを描画
-        if self.action["is_player"]:
-            # 自分の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
-        else:
-            # 相手の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
-            )
-
-    # 技後シーン
-    def draw_after_move_scene(self):
-        # 技のメッセージを描画
-        if self.action["is_player"]:
-            # 自分の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
+            _draw_message(
+                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
             )
             counter = 1
             for msg in self.message:
-                WRITER.draw(
-                    MESSAGE_X,
-                    MESSAGE_Y[counter],
-                    msg,
-                    MESSAGE_FONT_SIZE,
-                    0,
-                )
+                _draw_message(msg, counter)
                 counter += 1
         else:
             # 相手の行動のとき
-            WRITER.draw(
-                MESSAGE_X,
-                MESSAGE_Y[0],
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！",
-                MESSAGE_FONT_SIZE,
-                0,
+            _draw_message(
+                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
             )
             counter = 1
             for msg in self.message:
-                WRITER.draw(
-                    MESSAGE_X,
-                    MESSAGE_Y[counter],
-                    msg,
-                    MESSAGE_FONT_SIZE,
-                    0,
-                )
+                _draw_message(msg, counter)
                 counter += 1
+
+    # 自分が場に出すシーン
+    def update_player_put_scene(self):
+        time.sleep(1)
+        self.scene = MOVE_NAME_SCENE
+
+    def draw_player_put_scene(self):
+        self.draw_objects()
+        _draw_message(
+            f"ゆけっ！{self.my_monster_battling.base_monster_instance.name}！"
+        )
+
+    # 相手が場に出すシーン
+    def update_opponent_put_scene(self):
+        time.sleep(1)
+        self.scene = SELECT_ACTION_SCENE
+
+    def draw_opponent_put_scene(self):
+        self.draw_objects()
+        _draw_message(
+            f"相手は{self.opponent_monster_battling.base_monster_instance.name}を繰り出した！"
+        )
+
+    # オブジェクト描画を管理する関数
+    def draw_objects(
+        self, my_monster_is_displayed=True, opponent_monster_is_displayed=True
+    ):
+        # メッセージ描画枠を描画
+        pyxel.rectb(15, HEIGHT * 0.66 - 15, WIDTH - 30, HEIGHT * 0.33, 0)
+        if my_monster_is_displayed:
+            # 場に出ているプレイヤーのモンスターを描画
+            self.my_monster_battling.draw_monster(True)
+            # モンスターの名前とHPを描画
+            _draw_monster_name_and_hp(
+                self.my_monster_battling, MY_MONSTER_X - 32, MONSTER_Y - 80
+            )
+        if opponent_monster_is_displayed:
+            # 場に出ている相手モンスターを描画
+            self.opponent_monster_battling.draw_monster()
+            # モンスターの名前とHPを描画
+            _draw_monster_name_and_hp(
+                self.opponent_monster_battling,
+                OPPONENT_MONSTER_X - 32,
+                MONSTER_Y - 80,
+                is_visible=False,
+            )
 
 
 App()
