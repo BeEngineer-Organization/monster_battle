@@ -129,19 +129,19 @@ class App:
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[11],
+                    base_monster_instance=ALL_MONSTERS[0],
                     moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[11],
+                    base_monster_instance=ALL_MONSTERS[2],
                     moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[11],
+                    base_monster_instance=ALL_MONSTERS[3],
                     moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
             ]
@@ -580,6 +580,21 @@ class App:
                 self.scene = WIN_SCENE
             else:
                 self.my_monster_battling.win_count += 1
+                # 進化処理
+                if self.my_monster_battling.win_count == 2:
+                    self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
+                        ALL_MONSTERS.index(
+                            self.my_monster_battling.base_monster_instance
+                        )
+                        + 1
+                    ]
+                if self.my_monster_battling.win_count == 5:
+                    self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
+                        ALL_MONSTERS.index(
+                            self.my_monster_battling.base_monster_instance
+                        )
+                        + 1
+                    ]
                 self.opponent_monster_battling = self.opponent_monsters[
                     self.opponent_monsters.index(self.opponent_monster_battling) + 1
                 ]
