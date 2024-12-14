@@ -32,11 +32,12 @@ class BaseMonster:
 
 
 class Monster:
-    def __init__(self, x, y, base_monster_instance, moves):
+    def __init__(self, x, y, base_monster_instance, moves, win_count=0):
         self.x, self.y = x, y
         self.base_monster_instance = base_monster_instance
         self.moves = moves
         self.hp_now = base_monster_instance.hp
+        self.win_count = win_count
 
     def draw_monster(self, is_facing_right=False):
         # モンスターを描画

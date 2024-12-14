@@ -3,6 +3,7 @@ import PyxelUniversalFont as puf
 import random
 import time
 import sys
+import json
 
 from models import Monster, SelectTriangle
 from monsters import ALL_MONSTERS
@@ -102,39 +103,76 @@ class App:
         self.game_settings()
 
     def game_settings(self):
-        # 手持ちのモンスター
-        self.my_monsters = [
-            Monster(
-                MY_MONSTER_X,
-                MONSTER_Y,
-                ALL_MONSTERS[0],
-                [ALL_MOVES[0], ALL_MOVES[1]],
-            ),
-            Monster(
-                MY_MONSTER_X,
-                MONSTER_Y,
-                ALL_MONSTERS[3],
-                [ALL_MOVES[0], ALL_MOVES[1]],
-            ),
-            Monster(
-                MY_MONSTER_X,
-                MONSTER_Y,
-                ALL_MONSTERS[6],
-                [ALL_MOVES[0], ALL_MOVES[1]],
-            ),
-        ]
+        try:
+            # セーブデータの読み込み
+            with open("data.txt", "r") as f:
+                data = json.load(f)
+            my_monsters = []
+            for d in data:
+                moves = []
+                for i in d["move_index_list"]:
+                    moves.append(ALL_MOVES[i])
+                my_monsters.append(
+                    Monster(
+                        x=MY_MONSTER_X,
+                        y=MONSTER_Y,
+                        base_monster_instance=ALL_MONSTERS[d["monster_index"]],
+                        moves=moves,
+                        win_count=d["win_count"],
+                    ),
+                )
+            self.my_monsters = my_monsters
+        except FileNotFoundError:
+            # 自分のモンスター
+            self.my_monsters = [
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[0],
+                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                ),
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[3],
+                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                ),
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[6],
+                    moves=[ALL_MOVES[0], ALL_MOVES[1]],
+                ),
+            ]
+        # 相手のモンスター
         self.opponent_monsters = [
             Monster(
-                OPPONENT_MONSTER_X,
-                MONSTER_Y,
-                ALL_MONSTERS[2],
-                [ALL_MOVES[0]],
+                x=OPPONENT_MONSTER_X,
+                y=MONSTER_Y,
+                base_monster_instance=ALL_MONSTERS[11],
+                moves=[ALL_MOVES[2]],
             )
         ]
         # 場に出ているモンスター
         self.my_monster_battling = self.my_monsters[0]
         self.opponent_monster_battling = self.opponent_monsters[0]
         pyxel.run(self.update, self.draw)
+
+    def save(self):
+        data = []
+        for monster in self.my_monsters:
+            move_index_list = []
+            for move in monster.moves:
+                move_index_list.append(ALL_MOVES.index(move))
+            data.append(
+                {
+                    "monster_index": ALL_MONSTERS.index(monster.base_monster_instance),
+                    "move_index_list": move_index_list,
+                    "win_count": monster.win_count,
+                }
+            )
+        with open("data.txt", "w") as f:
+            json.dump(data, f)
 
     def update(self):
         if self.scene == SELECT_ACTION_SCENE:
@@ -506,6 +544,7 @@ class App:
                 + self.my_monsters[2].hp_now
                 == 0
             ):
+                self.save()
                 sys.exit()
             else:
                 # モンスター選択シーンに移動
