@@ -129,20 +129,20 @@ class App:
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[0],
-                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
+                    base_monster_instance=ALL_MONSTERS[11],
+                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[3],
-                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
+                    base_monster_instance=ALL_MONSTERS[11],
+                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[6],
-                    moves=[ALL_MOVES[11], ALL_MOVES[2]],
+                    base_monster_instance=ALL_MONSTERS[11],
+                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
             ]
         # 相手のモンスター
@@ -573,13 +573,16 @@ class App:
         elif self.opponent_monster_battling.hp_now == 0:
             if (
                 self.opponent_monsters[0].hp_now
-                + self.opponent_monsters[0].hp_now
-                + self.opponent_monsters[0].hp_now
+                + self.opponent_monsters[1].hp_now
+                + self.opponent_monsters[2].hp_now
                 == 0
             ):
                 self.scene = WIN_SCENE
             else:
                 self.my_monster_battling.win_count += 1
+                self.opponent_monster_battling = self.opponent_monsters[
+                    self.opponent_monsters.index(self.opponent_monster_battling) + 1
+                ]
                 # 相手が場に出すシーンに移動
                 self.scene = OPPONENT_PUT_SCENE
         else:

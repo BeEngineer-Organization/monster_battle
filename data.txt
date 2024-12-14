@@ -1,0 +1,1 @@
+[{"monster_index": 11, "move_index_list": [2, 1], "win_count": 2}, {"monster_index": 11, "move_index_list": [2, 1], "win_count": 0}, {"monster_index": 11, "move_index_list": [2, 1], "win_count": 0}]
