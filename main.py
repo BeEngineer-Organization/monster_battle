@@ -106,7 +106,7 @@ class App:
     def game_settings(self):
         try:
             # セーブデータの読み込み
-            with open("data.txt", "r") as f:
+            with open("data.json", "r") as f:
                 data = json.load(f)
             my_monsters = []
             for d in data:
@@ -184,7 +184,7 @@ class App:
                     "win_count": monster.win_count,
                 }
             )
-        with open("data.txt", "w") as f:
+        with open("data.json", "w") as f:
             json.dump(data, f)
 
     def update(self):
