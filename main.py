@@ -450,12 +450,12 @@ class App:
         if self.action["is_player"]:
             # 自分の行動のとき
             _draw_message(
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
         else:
             # 相手の行動のとき
             _draw_message(
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"相手の{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
 
     # 技シーン
@@ -505,12 +505,12 @@ class App:
         if self.action["is_player"]:
             # 自分の行動のとき
             _draw_message(
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
         else:
             # 相手の行動のとき
             _draw_message(
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"相手の{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
 
     # 技によるHP処理シーン
@@ -543,12 +543,12 @@ class App:
         if self.action["is_player"]:
             # 自分の行動のとき
             _draw_message(
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
         else:
             # 相手の行動のとき
             _draw_message(
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"相手の{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
 
     # 技メッセージシーン
@@ -610,7 +610,7 @@ class App:
         if self.action["is_player"]:
             # 自分の行動のとき
             _draw_message(
-                f"{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
             counter = 1
             for msg in self.message:
@@ -619,7 +619,7 @@ class App:
         else:
             # 相手の行動のとき
             _draw_message(
-                f"相手の{self.action["monster"].base_monster_instance.name}の{self.action["move"].name}！"
+                f"相手の{self.action['monster'].base_monster_instance.name}の{self.action['move'].name}！"
             )
             counter = 1
             for msg in self.message:
