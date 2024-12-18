@@ -120,7 +120,7 @@ class App:
                 )
             self.my_monsters = my_monsters
         except FileNotFoundError:
-            # 自分のモンスター
+            # セーブデータがないとき
             self.my_monsters = [
                 Monster(
                     x=MY_MONSTER_X,
@@ -190,7 +190,7 @@ class App:
             # 相手が場に出すシーン
             self.update_opponent_put_scene()
         elif self.scene == MOVE_NAME_SCENE:
-            # 技前シーン
+            # 技名シーン
             self.update_move_name_scene()
         elif self.scene == MOVE_SCENE:
             # 技シーン
@@ -243,7 +243,7 @@ class App:
             # 自分が場に出すシーン
             self.draw_player_put_scene()
         elif self.scene == MOVE_NAME_SCENE:
-            # 技前シーン
+            # 技名シーン
             self.draw_move_name_scene()
         elif self.scene == MOVE_SCENE:
             # 技シーン
@@ -343,8 +343,7 @@ class App:
                             self.actions = [my_action, opponent_action]
                         else:
                             self.actions = [opponent_action, my_action]
-                    # 技前シーンに移動
-                    self.select_triangle.reset(MESSAGE_Y[1])
+                    # 技名シーンに移動
                     self.scene = MOVE_NAME_SCENE
 
                 except IndexError:
@@ -356,10 +355,12 @@ class App:
         choices = []
         for move in self.my_monster_battling.base_monster_instance.moves:
             if move.kind == "recover":
+                # 回復技のとき
                 choices.append(
                     f"{move.name} 分類:回復 タイプ:{move.type} {move.description}"
                 )
             else:
+                # 攻撃技のとき
                 choices.append(
                     f"{move.name} 分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}"
                 )
@@ -383,10 +384,11 @@ class App:
         elif pyxel.btnr(pyxel.KEY_SPACE):
             # スペースボタンが離されるとき
             if self.select_triangle.y1 == MESSAGE_Y[4]:
-                # 技選択シーンに戻る
+                # 「戻る」ボタンが押されたとき、技選択シーンに戻る
                 self.select_triangle.reset(MESSAGE_Y[1])
                 self.scene = SELECT_ACTION_SCENE
             else:
+                # モンスターが選択されたとき
                 index = MESSAGE_Y.index(self.select_triangle.y1)
                 try:
                     # 選択したモンスターがすでに場に出ているとき、または選択したモンスターのHPが0のとき
@@ -397,12 +399,10 @@ class App:
                         return
                     else:
                         if self.my_monster_battling.hp_now == 0:
-                            self.my_monster_battling = self.my_monsters[index]
+                            # 場にいるモンスターのHPが0のとき、相手は行動しない
                             self.actions = []
-                            self.scene = PLAYER_PUT_SCENE
                         else:
-                            self.my_monster_battling = self.my_monsters[index]
-                            # 自分が場に出すシーンに移動
+                            # 場にいるモンスターのHPが0でないとき、相手は行動する
                             opponent_action = {
                                 "is_player": False,
                                 "monster": self.opponent_monster_battling,
@@ -415,8 +415,10 @@ class App:
                                 ],
                             }
                             self.actions = [opponent_action]
-                            self.select_triangle.reset(MESSAGE_Y[1])
-                            self.scene = PLAYER_PUT_SCENE
+                        # 場にいるモンスターを選択したモンスターに変更
+                        self.my_monster_battling = self.my_monsters[index]
+                        # 自分が場に出すシーンに移動
+                        self.scene = PLAYER_PUT_SCENE
 
                 except IndexError:
                     # 選択したモンスターがいないとき
@@ -445,7 +447,6 @@ class App:
         # 技シーンに移動
         self.scene = MOVE_SCENE
 
-    # 技名シーン
     def draw_move_name_scene(self):
         try:
             # 順に行動する
@@ -562,53 +563,58 @@ class App:
     # 技メッセージシーン
     def update_move_message_scene(self):
         time.sleep(1.5)
-        # 自分のモンスターのHPがなくなったとき
         if self.my_monster_battling.hp_now == 0:
-            # 全滅したら終了
+            # 自分のモンスターのHPがなくなったとき
             if (
                 self.my_monsters[0].hp_now
                 + self.my_monsters[1].hp_now
                 + self.my_monsters[2].hp_now
                 == 0
             ):
+                # 全滅したとき、敗北シーンに移動
                 self.scene = LOSE_SCENE
             else:
                 # モンスター選択シーンに移動
                 self.select_triangle.reset(MESSAGE_Y[2])
                 self.scene = SELECT_MONSTER_SCENE
-        # 相手のモンスターのHPが無くなったとき
         elif self.opponent_monster_battling.hp_now == 0:
+            # 相手のモンスターのHPが無くなったとき
             if (
                 self.opponent_monsters[0].hp_now
                 + self.opponent_monsters[1].hp_now
                 + self.opponent_monsters[2].hp_now
                 == 0
             ):
+                # 相手が全滅したら、勝利シーンに移動
                 self.scene = WIN_SCENE
             else:
+                # 場にいるモンスターの勝利回数が増加
                 self.my_monster_battling.win_count += 1
                 # 進化処理
                 if self.my_monster_battling.win_count == 1:
+                    # 勝利回数が1回なら進化
                     self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
                         ALL_MONSTERS.index(
                             self.my_monster_battling.base_monster_instance
                         )
                         + 1
                     ]
-                if self.my_monster_battling.win_count == 3:
+                elif self.my_monster_battling.win_count == 3:
+                    # 勝利回数が3回なら進化
                     self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
                         ALL_MONSTERS.index(
                             self.my_monster_battling.base_monster_instance
                         )
                         + 1
                     ]
+                # 相手の場にいるモンスターを次の相手モンスターに変更
                 self.opponent_monster_battling = self.opponent_monsters[
                     self.opponent_monsters.index(self.opponent_monster_battling) + 1
                 ]
                 # 相手が場に出すシーンに移動
                 self.scene = OPPONENT_PUT_SCENE
         else:
-            # 技名シーンに移動
+            # 誰のHPも0にならないとき、技名シーンに移動
             self.scene = MOVE_NAME_SCENE
 
     def draw_move_message_scene(self):
