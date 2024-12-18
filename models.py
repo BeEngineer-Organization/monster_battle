@@ -19,6 +19,7 @@ class BaseMonster:
         defense,
         speed,
         compatibility,
+        moves,
     ):
         self.u, self.v, self.w, self.h = u, v, w, h
         self.name = name
@@ -29,13 +30,13 @@ class BaseMonster:
         self.defense = defense
         self.speed = speed
         self.compatibility = compatibility
+        self.moves = moves
 
 
 class Monster:
-    def __init__(self, x, y, base_monster_instance, moves, win_count=0):
+    def __init__(self, x, y, base_monster_instance, win_count=0):
         self.x, self.y = x, y
         self.base_monster_instance = base_monster_instance
-        self.moves = moves
         self.hp_now = base_monster_instance.hp
         self.win_count = win_count
 

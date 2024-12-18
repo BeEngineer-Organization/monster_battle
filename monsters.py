@@ -1,4 +1,5 @@
 from models import BaseMonster
+from moves import *
 
 ALL_MONSTERS = [
     BaseMonster(
@@ -22,6 +23,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], GRASS_MOVES[0], GRASS_MOVES[3]],
     ),
     BaseMonster(
         u=0,
@@ -44,6 +46,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], GRASS_MOVES[1], POIZON_MOVES[0], GRASS_MOVES[3]],
     ),
     BaseMonster(
         u=0,
@@ -66,6 +69,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[1], GRASS_MOVES[2], POIZON_MOVES[1], GRASS_MOVES[3]],
     ),
     BaseMonster(
         u=32,
@@ -88,6 +92,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], FIRE_MOVES[0]],
     ),
     BaseMonster(
         u=32,
@@ -110,6 +115,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], FIRE_MOVES[1], DRAGON_MOVES[0]],
     ),
     BaseMonster(
         u=32,
@@ -132,6 +138,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[FIRE_MOVES[2], FLY_MOVES[0], DRAGON_MOVES[1], FLY_MOVES[1]],
     ),
     BaseMonster(
         u=64,
@@ -154,6 +161,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], WATER_MOVES[0]],
     ),
     BaseMonster(
         u=64,
@@ -176,6 +184,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], WATER_MOVES[1]],
     ),
     BaseMonster(
         u=64,
@@ -198,6 +207,7 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[1], WATER_MOVES[2]],
     ),
     BaseMonster(
         u=96,
@@ -220,6 +230,7 @@ ALL_MONSTERS = [
             "ドラゴン": 2,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], DRAGON_MOVES[0]],
     ),
     BaseMonster(
         u=96,
@@ -242,6 +253,7 @@ ALL_MONSTERS = [
             "ドラゴン": 2,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[0], DRAGON_MOVES[1]],
     ),
     BaseMonster(
         u=96,
@@ -264,6 +276,7 @@ ALL_MONSTERS = [
             "ドラゴン": 2,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[1], DRAGON_MOVES[2], FLY_MOVES[0], FLY_MOVES[1]],
     ),
     BaseMonster(
         u=128,
@@ -286,5 +299,6 @@ ALL_MONSTERS = [
             "ドラゴン": 1,
             "どく": 1,
         },
+        moves=[NORMAL_MOVES[1], FIRE_MOVES[2], WATER_MOVES[1], GRASS_MOVES[1]],
     ),
 ]

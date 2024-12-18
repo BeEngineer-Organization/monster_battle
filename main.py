@@ -7,7 +7,6 @@ import json
 
 from models import Monster, SelectTriangle
 from monsters import ALL_MONSTERS
-from moves import ALL_MOVES
 
 WIDTH, HEIGHT = 640, 400
 WRITER = puf.Writer("misaki_gothic.ttf")
@@ -110,15 +109,11 @@ class App:
                 data = json.load(f)
             my_monsters = []
             for d in data:
-                moves = []
-                for i in d["move_index_list"]:
-                    moves.append(ALL_MOVES[i])
                 my_monsters.append(
                     Monster(
                         x=MY_MONSTER_X,
                         y=MONSTER_Y,
                         base_monster_instance=ALL_MONSTERS[d["monster_index"]],
-                        moves=moves,
                         win_count=d["win_count"],
                     ),
                 )
@@ -130,19 +125,16 @@ class App:
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
                     base_monster_instance=ALL_MONSTERS[0],
-                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
-                ),
-                Monster(
-                    x=MY_MONSTER_X,
-                    y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[2],
-                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
                 ),
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
                     base_monster_instance=ALL_MONSTERS[3],
-                    moves=[ALL_MOVES[2], ALL_MOVES[1]],
+                ),
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[6],
                 ),
             ]
         # 相手のモンスター
@@ -151,19 +143,16 @@ class App:
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
                 base_monster_instance=ALL_MONSTERS[random.choice([0, 3, 6, 9])],
-                moves=[ALL_MOVES[0]],
             ),
             Monster(
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
                 base_monster_instance=ALL_MONSTERS[random.choice([1, 4, 7, 10])],
-                moves=[ALL_MOVES[0]],
             ),
             Monster(
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
                 base_monster_instance=ALL_MONSTERS[random.choice([2, 5, 8, 11, 12])],
-                moves=[ALL_MOVES[0]],
             ),
         ]
         # 場に出ているモンスター
@@ -174,13 +163,9 @@ class App:
     def save(self):
         data = []
         for monster in self.my_monsters:
-            move_index_list = []
-            for move in monster.moves:
-                move_index_list.append(ALL_MOVES.index(move))
             data.append(
                 {
                     "monster_index": ALL_MONSTERS.index(monster.base_monster_instance),
-                    "move_index_list": move_index_list,
                     "win_count": monster.win_count,
                 }
             )
@@ -319,14 +304,20 @@ class App:
                     my_action = {
                         "is_player": True,
                         "monster": self.my_monster_battling,
-                        "move": self.my_monster_battling.moves[index],
+                        "move": self.my_monster_battling.base_monster_instance.moves[
+                            index
+                        ],
                     }
                     # 相手の行動
                     opponent_action = {
                         "is_player": False,
                         "monster": self.opponent_monster_battling,
-                        "move": self.opponent_monster_battling.moves[
-                            random.randrange(len(self.opponent_monster_battling.moves))
+                        "move": self.opponent_monster_battling.base_monster_instance.moves[
+                            random.randrange(
+                                len(
+                                    self.opponent_monster_battling.base_monster_instance.moves
+                                )
+                            )
                         ],
                     }
                     # 素早さの差を取得
@@ -356,7 +347,7 @@ class App:
     def draw_select_move_scene(self):
         # 選択肢として描画する情報
         choices = []
-        for move in self.my_monster_battling.moves:
+        for move in self.my_monster_battling.base_monster_instance.moves:
             if move.kind == "recover":
                 choices.append(
                     f"{move.name} 分類:回復 タイプ:{move.type} {move.description}"
@@ -408,9 +399,11 @@ class App:
                             opponent_action = {
                                 "is_player": False,
                                 "monster": self.opponent_monster_battling,
-                                "move": self.opponent_monster_battling.moves[
+                                "move": self.opponent_monster_battling.base_monster_instance.moves[
                                     random.randrange(
-                                        len(self.opponent_monster_battling.moves)
+                                        len(
+                                            self.opponent_monster_battling.base_monster_instance.moves
+                                        )
                                     )
                                 ],
                             }
@@ -426,7 +419,9 @@ class App:
         # 選択肢として描画する情報
         choices = []
         for monster in self.my_monsters:
-            move_names = " ".join([move.name for move in monster.moves])
+            move_names = " ".join(
+                [move.name for move in monster.base_monster_instance.moves]
+            )
             choices.append(
                 f"{monster.base_monster_instance.name} {monster.hp_now}/{monster.base_monster_instance.hp} {move_names}"
             )
