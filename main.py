@@ -578,7 +578,8 @@ class App:
                 self.select_triangle.reset(MESSAGE_Y[2])
                 self.scene = SELECT_MONSTER_SCENE
         elif self.opponent_monster_battling.hp_now == 0:
-            # 相手のモンスターのHPが無くなったとき
+            # 相手のモンスターのHPが無くなったとき、場にいるモンスターの勝利回数が増加
+            self.my_monster_battling.win_count += 1
             if (
                 self.opponent_monsters[0].hp_now
                 + self.opponent_monsters[1].hp_now
@@ -588,8 +589,6 @@ class App:
                 # 相手が全滅したら、勝利シーンに移動
                 self.scene = WIN_SCENE
             else:
-                # 場にいるモンスターの勝利回数が増加
-                self.my_monster_battling.win_count += 1
                 # 進化処理
                 if self.my_monster_battling.win_count == 1:
                     # 勝利回数が1回なら進化
