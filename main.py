@@ -21,6 +21,7 @@ MOVE_MESSAGE_SCENE = 6
 PLAYER_PUT_SCENE = 7
 OPPONENT_PUT_SCENE = 8
 WIN_SCENE = 9
+LOSE_SCENE = 10
 
 MESSAGE_X = 40
 SELECTED_MESSAGE_X = MESSAGE_X + 20
@@ -203,6 +204,9 @@ class App:
         elif self.scene == WIN_SCENE:
             # 勝利シーン
             self.update_win_scene()
+        elif self.scene == LOSE_SCENE:
+            # 敗北シーン
+            self.update_lose_scene()
 
     def draw(self):
         pyxel.cls(7)
@@ -253,6 +257,9 @@ class App:
         elif self.scene == WIN_SCENE:
             # 勝利シーン
             self.draw_win_scene()
+        elif self.scene == LOSE_SCENE:
+            # 敗北シーン
+            self.draw_lose_scene()
 
     # 行動選択シーン
     def update_select_action_scene(self):
@@ -419,11 +426,8 @@ class App:
         # 選択肢として描画する情報
         choices = []
         for monster in self.my_monsters:
-            move_names = " ".join(
-                [move.name for move in monster.base_monster_instance.moves]
-            )
             choices.append(
-                f"{monster.base_monster_instance.name} {monster.hp_now}/{monster.base_monster_instance.hp} {move_names}"
+                f"{monster.base_monster_instance.name} タイプ:{monster.base_monster_instance.type1} {monster.base_monster_instance.type2} HP:{monster.hp_now}/{monster.base_monster_instance.hp} 攻:{monster.base_monster_instance.attack} 防:{monster.base_monster_instance.defense} 速:{monster.base_monster_instance.speed}"
             )
         # 技の選択肢を描画
         _draw_choices(choices)
@@ -567,8 +571,7 @@ class App:
                 + self.my_monsters[2].hp_now
                 == 0
             ):
-                self.save()
-                sys.exit()
+                self.scene = LOSE_SCENE
             else:
                 # モンスター選択シーンに移動
                 self.select_triangle.reset(MESSAGE_Y[2])
@@ -585,14 +588,14 @@ class App:
             else:
                 self.my_monster_battling.win_count += 1
                 # 進化処理
-                if self.my_monster_battling.win_count == 2:
+                if self.my_monster_battling.win_count == 1:
                     self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
                         ALL_MONSTERS.index(
                             self.my_monster_battling.base_monster_instance
                         )
                         + 1
                     ]
-                if self.my_monster_battling.win_count == 5:
+                if self.my_monster_battling.win_count == 3:
                     self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
                         ALL_MONSTERS.index(
                             self.my_monster_battling.base_monster_instance
@@ -658,6 +661,15 @@ class App:
 
     def draw_win_scene(self):
         _draw_message("相手に勝利した！")
+
+    # 敗北シーン
+    def update_lose_scene(self):
+        time.sleep(1)
+        self.save()
+        sys.exit()
+
+    def draw_lose_scene(self):
+        _draw_message("負けてしまった...")
 
 
 App()
