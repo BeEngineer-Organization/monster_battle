@@ -122,23 +122,23 @@ class Monster:
 
 
 class Move:
-    def __init__(self, name, description, type):
+    def __init__(self, name, type):
         self.name = name
-        self.description = description
         self.type = type
 
 
 class AttackMove(Move):
-    def __init__(self, name, description, type, power, accuracy):
-        super().__init__(name, description, type)
+    def __init__(self, name, type, power, accuracy):
+        super().__init__(name, type)
         self.kind = "attack"
         self.power = power
         self.accuracy = accuracy
 
 
 class RecoverMove(Move):
-    def __init__(self, name, description, type):
-        super().__init__(name, description, type)
+    def __init__(self, name, type, description):
+        super().__init__(name, type)
+        self.description = description
         self.kind = "recover"
 
 

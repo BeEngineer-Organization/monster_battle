@@ -362,7 +362,7 @@ class App:
             else:
                 # 攻撃技のとき
                 choices.append(
-                    f"{move.name} 分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy} {move.description}"
+                    f"{move.name} 分類:攻撃 タイプ:{move.type} 威力:{move.power} 命中:{move.accuracy}"
                 )
         # 技の選択肢を描画
         _draw_choices(choices)
