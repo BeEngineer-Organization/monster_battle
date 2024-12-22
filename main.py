@@ -6,7 +6,7 @@ import sys
 import json
 
 from models import Monster, SelectTriangle
-from sample_monster import sample_monster
+# from sample_monster import sample_monster
 
 WIDTH, HEIGHT = 640, 400
 WRITER = puf.Writer("misaki_gothic.ttf")
