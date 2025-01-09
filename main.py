@@ -165,7 +165,16 @@ class App:
         pyxel.run(self.update, self.draw)
 
     def save(self):
-        pass
+        data = []
+        for monster in self.my_monsters:
+            data.append(
+                {
+                    "monster_index": ALL_MONSTERS.index(monster.base_monster_instance),
+                    "win_count": monster.win_count,
+                }
+            )
+        with open("data.json", "w") as f:
+            json.dump(data, f)
 
     def update(self):
         if self.scene == SELECT_ACTION_SCENE:
