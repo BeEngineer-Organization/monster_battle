@@ -125,17 +125,7 @@ class App:
                 Monster(
                     x=MY_MONSTER_X,
                     y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[0],
-                ),
-                Monster(
-                    x=MY_MONSTER_X,
-                    y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[2],
-                ),
-                Monster(
-                    x=MY_MONSTER_X,
-                    y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[4],
+                    base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
                 ),
             ]
         # 相手のモンスター
@@ -272,14 +262,10 @@ class App:
                 # 技選択シーンに移動
                 self.select_triangle.reset(MESSAGE_Y[4])
                 self.scene = SELECT_MOVE_SCENE
-            elif self.select_triangle.y1 == MESSAGE_Y[1]:
-                # モンスター選択シーンに移動
-                self.select_triangle.reset(MESSAGE_Y[4])
-                self.scene = SELECT_MONSTER_SCENE
 
     def draw_select_action_scene(self):
         # 行動の選択肢を描画
-        _draw_choices(["たたかう", "モンスター"])
+        _draw_choices(["たたかう"])
         # 矢印の描画
         self.select_triangle.draw()
 
@@ -361,73 +347,10 @@ class App:
 
     # モンスター選択シーン
     def update_select_monster_scene(self):
-        if pyxel.btnr(pyxel.KEY_UP):
-            # 上ボタンが離されるとき
-            self.select_triangle.select(is_up=True)
-
-        elif pyxel.btnr(pyxel.KEY_DOWN):
-            # 下ボタンが離されるとき
-            self.select_triangle.select()
-
-        elif pyxel.btnr(pyxel.KEY_SPACE):
-            # スペースボタンが離されるとき
-            if self.select_triangle.y1 == MESSAGE_Y[4]:
-                # 「戻る」ボタンが押されたとき、技選択シーンに戻る
-                self.select_triangle.reset(MESSAGE_Y[1])
-                self.scene = SELECT_ACTION_SCENE
-            else:
-                # モンスターが選択されたとき
-                index = MESSAGE_Y.index(self.select_triangle.y1)
-                try:
-                    # 選択したモンスターがすでに場に出ているとき、または選択したモンスターのHPが0のとき
-                    if (
-                        self.my_monsters[index] == self.my_monster_battling
-                        or self.my_monsters[index].hp_now == 0
-                    ):
-                        return
-                    else:
-                        if self.my_monster_battling.hp_now == 0:
-                            # 場にいるモンスターのHPが0のとき、相手は行動しない
-                            self.actions = []
-                        else:
-                            # 場にいるモンスターのHPが0でないとき、相手は行動する
-                            opponent_action = {
-                                "is_player": False,
-                                "monster": self.opponent_monster_battling,
-                                "move": self.opponent_monster_battling.base_monster_instance.moves[
-                                    random.randrange(
-                                        len(
-                                            self.opponent_monster_battling.base_monster_instance.moves
-                                        )
-                                    )
-                                ],
-                            }
-                            self.actions = [opponent_action]
-                        # 場にいるモンスターを選択したモンスターに変更
-                        self.my_monster_battling = self.my_monsters[index]
-                        # 自分が場に出すシーンに移動
-                        self.scene = PLAYER_PUT_SCENE
-
-                except IndexError:
-                    # 選択したモンスターがいないとき
-                    return
+        pass
 
     def draw_select_monster_scene(self):
-        # 選択肢として描画する情報
-        choices = []
-        for monster in self.my_monsters:
-            choices.append(
-                f"{monster.base_monster_instance.name} タイプ:{monster.base_monster_instance.type} HP:{monster.hp_now}/{monster.base_monster_instance.hp} 攻:{monster.base_monster_instance.attack} 防:{monster.base_monster_instance.defense} 速:{monster.base_monster_instance.speed}"
-            )
-        # 技の選択肢を描画
-        _draw_choices(choices)
-        if self.my_monster_battling.hp_now > 0:
-            # 自分の場に出ているモンスターが戦えるとき、「戻る」を描画
-            WRITER.draw(
-                SELECTED_MESSAGE_X, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0
-            )
-        # 矢印の描画
-        self.select_triangle.draw()
+        pass
 
     # 技名シーン
     def update_move_name_scene(self):
@@ -530,18 +453,8 @@ class App:
         time.sleep(1.5)
         if self.my_monster_battling.hp_now == 0:
             # 自分のモンスターのHPがなくなったとき
-            if (
-                self.my_monsters[0].hp_now
-                + self.my_monsters[1].hp_now
-                + self.my_monsters[2].hp_now
-                == 0
-            ):
-                # 全滅したとき、敗北シーンに移動
-                self.scene = LOSE_SCENE
-            else:
-                # モンスター選択シーンに移動
-                self.select_triangle.reset(MESSAGE_Y[2])
-                self.scene = SELECT_MONSTER_SCENE
+            # 全滅したとき、敗北シーンに移動
+            self.scene = LOSE_SCENE
         elif self.opponent_monster_battling.hp_now == 0:
             # 相手のモンスターのHPが無くなったとき、場にいるモンスターの勝利回数が増加
             self.my_monster_battling.win_count += 1
