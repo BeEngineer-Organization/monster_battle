@@ -22,7 +22,7 @@ class BaseMonster:
     ):
         self.u, self.v, self.w, self.h = u, v, w, h
         self.name = name
-        self.type1 = type
+        self.type = type
         self.hp = hp
         self.attack = attack
         self.defense = defense
