@@ -6,7 +6,7 @@ import sys
 import json
 
 from models import Monster, SelectTriangle
-from sample_monster import sample_monster
+from monsters import ALL_MONSTERS
 
 WIDTH, HEIGHT = 640, 400
 WRITER = puf.Writer("misaki_gothic.ttf")
@@ -108,7 +108,7 @@ class App:
             Monster(
                 x=MY_MONSTER_X,
                 y=MONSTER_Y,
-                base_monster_instance=sample_monster,
+                base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
             ),
         ]
         # 相手のモンスター
@@ -116,7 +116,12 @@ class App:
             Monster(
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
-                base_monster_instance=sample_monster,
+                base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
+            ),
+            Monster(
+                x=OPPONENT_MONSTER_X,
+                y=MONSTER_Y,
+                base_monster_instance=ALL_MONSTERS[random.choice([1, 3, 5])],
             ),
         ]
         # 場に出ているモンスター
@@ -427,10 +432,10 @@ class App:
         time.sleep(1.5)
         if self.my_monster_battling.hp_now == 0:
             # 自分のモンスターのHPがなくなったとき、敗北シーンに移動
-                self.scene = LOSE_SCENE
+            self.scene = LOSE_SCENE
         elif self.opponent_monster_battling.hp_now == 0:
             # 相手のモンスターのHPが無くなったとき、勝利シーンに移動
-                self.scene = WIN_SCENE
+            self.scene = WIN_SCENE
         else:
             # 誰のHPも0にならないとき、技名シーンに移動
             self.scene = MOVE_NAME_SCENE

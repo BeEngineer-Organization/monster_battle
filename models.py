@@ -12,8 +12,7 @@ class BaseMonster:
         w,
         h,
         name,
-        type1,
-        type2,
+        type,
         hp,
         attack,
         defense,
@@ -23,8 +22,7 @@ class BaseMonster:
     ):
         self.u, self.v, self.w, self.h = u, v, w, h
         self.name = name
-        self.type1 = type1
-        self.type2 = type2
+        self.type1 = type
         self.hp = hp
         self.attack = attack
         self.defense = defense
@@ -69,77 +67,47 @@ class Monster:
 
     def get_result_of_move(self, move, target):
         message = []
-        if move.kind == "recover":
-            # 回復技のとき
-            recovery_points = round(self.base_monster_instance.hp * 0.5)
-            if self.hp_now == self.base_monster_instance.hp:
-                result = self.hp_now
-                message.append("しかし体力は満タンだ！")
-            elif self.hp_now + recovery_points > self.base_monster_instance.hp:
-                # 最大HPを超えるとき
-                result = self.base_monster_instance.hp
+        if move.accuracy > random.randrange(99):
+            # 命中したとき
+            # 技の相性
+            compatibility = target.base_monster_instance.compatibility[move.type]
+            if move.type == self.base_monster_instance.type:
+                type_match = 1.5
             else:
-                result = self.hp_now + recovery_points
-
+                type_match = 1
+            if compatibility > 1:
+                message.append("効果は抜群だ！")
+            elif compatibility < 1:
+                message.append("効果はいまひとつだ...")
+            # ダメージ
+            base_damage = round(
+                11
+                * self.base_monster_instance.attack
+                * move.power
+                * type_match
+                * target.base_monster_instance.compatibility[move.type]
+                / (25 * target.base_monster_instance.defense)
+            )
+            damage = round(base_damage * random.randint(85, 100) / 100)
+            if target.hp_now < damage:
+                # HPが負の値になるとき
+                result = 0
+                message.append(f"{target.base_monster_instance.name}はやられた")
+            else:
+                result = target.hp_now - damage
         else:
-            # 攻撃技
-            if move.accuracy > random.randrange(99):
-                # 命中したとき
-                # 技の相性
-                compatibility = target.base_monster_instance.compatibility[move.type]
-                if (
-                    move.type == self.base_monster_instance.type1
-                    or self.base_monster_instance.type2
-                ):
-                    type_match = 1.5
-                else:
-                    type_match = 1
-                if compatibility > 1:
-                    message.append("効果は抜群だ！")
-                elif compatibility < 1:
-                    message.append("効果はいまひとつだ...")
-                # ダメージ
-                base_damage = round(
-                    11
-                    * self.base_monster_instance.attack
-                    * move.power
-                    * type_match
-                    * target.base_monster_instance.compatibility[move.type]
-                    / (25 * target.base_monster_instance.defense)
-                )
-                damage = round(base_damage * random.randint(85, 100) / 100)
-                if target.hp_now < damage:
-                    # HPが負の値になるとき
-                    result = 0
-                    message.append(f"{target.base_monster_instance.name}はやられた")
-                else:
-                    result = target.hp_now - damage
-            else:
-                # 外れたとき
-                result = target.hp_now
-                message.append("しかし当たらなかった！")
+            # 外れたとき
+            result = target.hp_now
+            message.append("しかし当たらなかった！")
         return result, message
 
 
 class Move:
-    def __init__(self, name, type):
+    def __init__(self, name, type, power, accuracy):
         self.name = name
         self.type = type
-
-
-class AttackMove(Move):
-    def __init__(self, name, type, power, accuracy):
-        super().__init__(name, type)
-        self.kind = "attack"
         self.power = power
         self.accuracy = accuracy
-
-
-class RecoverMove(Move):
-    def __init__(self, name, type, description):
-        super().__init__(name, type)
-        self.description = description
-        self.kind = "recover"
 
 
 class SelectTriangle:
