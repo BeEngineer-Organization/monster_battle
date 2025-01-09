@@ -104,6 +104,41 @@ class App:
         self.game_settings()
 
     def game_settings(self):
+        try:
+            # セーブデータの読み込み
+            with open("data.json", "r") as f:
+                data = json.load(f)
+            my_monsters = []
+            for d in data:
+                my_monsters.append(
+                    Monster(
+                        x=MY_MONSTER_X,
+                        y=MONSTER_Y,
+                        base_monster_instance=ALL_MONSTERS[d["monster_index"]],
+                        win_count=d["win_count"],
+                    ),
+                )
+            self.my_monsters = my_monsters
+        except FileNotFoundError:
+            # セーブデータがないとき
+            self.my_monsters = [
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[0],
+                ),
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[2],
+                ),
+                Monster(
+                    x=MY_MONSTER_X,
+                    y=MONSTER_Y,
+                    base_monster_instance=ALL_MONSTERS[4],
+                ),
+            ]
+        # class complete_version用
         self.my_monsters = [
             Monster(
                 x=MY_MONSTER_X,
