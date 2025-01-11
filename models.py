@@ -42,26 +42,26 @@ class Monster:
         # モンスターを描画
         if is_facing_right:
             pyxel.blt(
-                self.x,
-                self.y,
-                0,
-                self.base_monster_instance.u,
-                self.base_monster_instance.v,
-                self.base_monster_instance.w * (-1),
-                self.base_monster_instance.h,
-                TRANSPARENT_COLOR,
+                x=self.x,
+                y=self.y,
+                img=0,
+                u=self.base_monster_instance.u,
+                v=self.base_monster_instance.v,
+                w=self.base_monster_instance.w * (-1),
+                h=self.base_monster_instance.h,
+                colkey=TRANSPARENT_COLOR,
                 scale=4,
             )
         else:
             pyxel.blt(
-                self.x,
-                self.y,
-                0,
-                self.base_monster_instance.u,
-                self.base_monster_instance.v,
-                self.base_monster_instance.w,
-                self.base_monster_instance.h,
-                TRANSPARENT_COLOR,
+                x=self.x,
+                y=self.y,
+                img=0,
+                u=self.base_monster_instance.u,
+                v=self.base_monster_instance.v,
+                w=self.base_monster_instance.w,
+                h=self.base_monster_instance.h,
+                colkey=TRANSPARENT_COLOR,
                 scale=4,
             )
 
