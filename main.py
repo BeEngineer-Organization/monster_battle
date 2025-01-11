@@ -55,6 +55,7 @@ class App:
     def __init__(self):
         pyxel.init(WIDTH, HEIGHT)
         pyxel.load("./resource.pyxres")
+        self.scene = SELECT_ACTION_SCENE
         self.game_settings()
 
     def game_settings(self):
