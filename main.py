@@ -198,7 +198,7 @@ class App:
         # メッセージ描画枠を描画
         pyxel.rectb(15, HEIGHT * 0.66 - 15, WIDTH - 30, HEIGHT * 0.33, 0)
         # 場に出ているプレイヤーのモンスターを描画
-        self.my_monster_battling.draw_monster(True)
+        self.my_monster_battling.draw_monster(is_facing_right=True)
         # モンスターの名前とHPを描画
         _draw_monster_name_and_hp(
             self.my_monster_battling, MY_MONSTER_X, MONSTER_Y - 80
