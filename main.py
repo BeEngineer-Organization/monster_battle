@@ -59,7 +59,7 @@ def _draw_monster_name_and_hp(monster, x, y, is_visible=True):
         WRITER.draw(
             x,
             y,
-            f"{str(monster.hp_now)}/{str(monster.base_monster_instance.hp)}",
+            f"{monster.hp_now}/{monster.base_monster_instance.hp}",
             16,
             0,
         )
