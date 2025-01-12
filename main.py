@@ -266,7 +266,7 @@ class App:
     def draw_select_action_scene(self):
         # 行動の選択肢を描画
         _draw_choices(["たたかう"])
-        # 矢印の描画
+        # 三角形の描画
         self.select_triangle.draw()
 
     # 技選択シーン
@@ -342,7 +342,7 @@ class App:
         _draw_choices(choices)
         # 「戻る」を描画
         WRITER.draw(SELECTED_MESSAGE_X, MESSAGE_Y[4], "もどる", MESSAGE_FONT_SIZE, 0)
-        # 矢印の描画
+        # 三角形の描画
         self.select_triangle.draw()
 
     # モンスター選択シーン
