@@ -99,7 +99,7 @@ class App:
             base_x=MESSAGE_X,
             base_y=MESSAGE_Y[0],
             delta_y=DELTA_MESSAGE_Y,
-            y1_max=MESSAGE_Y[1],
+            y1_max=MESSAGE_Y[0],
         )
         self.game_settings()
 
