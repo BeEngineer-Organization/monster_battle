@@ -90,8 +90,8 @@ class Monster:
                 / (25 * target.base_monster_instance.defense)
             )
             damage = round(base_damage * random.randint(85, 100) / 100)
-            if target.hp_now < damage:
-                # HPが負の値になるとき
+            if target.hp_now - damage <= 0:
+                # HPが0以下の値になるとき
                 result = 0
                 message.append(f"{target.base_monster_instance.name}はやられた")
             else:
