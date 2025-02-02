@@ -407,6 +407,8 @@ class App:
             )
             self.result = result
             self.message = message
+        print(f"result: {self.result}")
+        print(f"message: {self.message}")
         # 技によるHP処理シーンに移動
         self.scene = MOVE_HP_SCENE
 
