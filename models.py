@@ -67,7 +67,7 @@ class Monster:
 
     def get_result_of_move(self, move, target):
         message = []
-        if move.accuracy > random.randrange(99):
+        if move.accuracy > random.randrange(100):
             # 命中したとき
             # 技の相性
             compatibility = target.base_monster_instance.compatibility[move.type]
