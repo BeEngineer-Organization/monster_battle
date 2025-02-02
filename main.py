@@ -334,7 +334,7 @@ class App:
                         self.actions = [opponent_action, my_action]
                     else:
                         # 素早さが同じだと50%で決まる
-                        if random.randrange(1) == 0:
+                        if random.randrange(1):
                             self.actions = [my_action, opponent_action]
                         else:
                             self.actions = [opponent_action, my_action]
