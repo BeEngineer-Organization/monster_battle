@@ -71,14 +71,15 @@ class Monster:
             # 命中したとき
             # 技の相性
             compatibility = target.base_monster_instance.compatibility[move.type]
-            if move.type == self.base_monster_instance.type:
-                type_match = 1.5
-            else:
-                type_match = 1
             if compatibility > 1:
                 message.append("効果は抜群だ！")
             elif compatibility < 1:
                 message.append("効果はいまひとつだ...")
+            # モンスターのタイプと技のタイプが一致していれば 1.5 倍の補正が乗る
+            if move.type == self.base_monster_instance.type:
+                type_match = 1.5
+            else:
+                type_match = 1
             # ダメージ
             base_damage = round(
                 11
