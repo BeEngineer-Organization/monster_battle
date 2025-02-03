@@ -99,7 +99,7 @@ class App:
             base_x=MESSAGE_X,
             base_y=MESSAGE_Y[0],
             delta_y=DELTA_MESSAGE_Y,
-            y1_max=MESSAGE_Y[0],
+            y1_max=MESSAGE_Y[1],
         )
         self.game_settings()
 
@@ -265,7 +265,7 @@ class App:
 
     def draw_select_action_scene(self):
         # 行動の選択肢を描画
-        _draw_choices(["たたかう"])
+        _draw_choices(["たたかう", "モンスター"])
         # 三角形の描画
         self.select_triangle.draw()
 
