@@ -506,13 +506,10 @@ class App:
 
     # 自分が場に出すシーン
     def update_player_put_scene(self):
-        time.sleep(1)
-        self.scene = MOVE_NAME_SCENE
+        pass
 
     def draw_player_put_scene(self):
-        _draw_message(
-            f"ゆけっ！{self.my_monster_battling.base_monster_instance.name}！"
-        )
+        pass
 
     # 相手が場に出すシーン
     def update_opponent_put_scene(self):
