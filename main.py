@@ -119,6 +119,7 @@ class App:
                     ),
                 )
             self.my_monsters = my_monsters
+            print("Loaded data")
         except FileNotFoundError:
             # セーブデータがないとき
             self.my_monsters = [
