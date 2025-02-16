@@ -104,43 +104,21 @@ class App:
         self.game_settings()
 
     def game_settings(self):
-        try:
-            # セーブデータの読み込み
-            with open("data.json", "r") as f:
-                data = json.load(f)
-            my_monsters = []
-            for d in data:
-                my_monsters.append(
-                    Monster(
-                        x=MY_MONSTER_X,
-                        y=MONSTER_Y,
-                        base_monster_instance=ALL_MONSTERS[d["monster_index"]],
-                        win_count=d["win_count"],
-                    ),
-                )
-            self.my_monsters = my_monsters
-            print("Loaded data")
-        except FileNotFoundError:
-            # セーブデータがないとき
-            self.my_monsters = [
-                Monster(
-                    x=MY_MONSTER_X,
-                    y=MONSTER_Y,
-                    base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
-                ),
-            ]
+        # 自分のモンスター
+        self.my_monsters = [
+            Monster(
+                x=MY_MONSTER_X,
+                y=MONSTER_Y,
+                base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
+            ),
+        ]
         # 相手のモンスター
         self.opponent_monsters = [
             Monster(
                 x=OPPONENT_MONSTER_X,
                 y=MONSTER_Y,
                 base_monster_instance=ALL_MONSTERS[random.choice([0, 2, 4])],
-            ),
-            Monster(
-                x=OPPONENT_MONSTER_X,
-                y=MONSTER_Y,
-                base_monster_instance=ALL_MONSTERS[random.choice([1, 3, 5])],
-            ),
+            )
         ]
         # 場に出ているモンスター
         self.my_monster_battling = self.my_monsters[0]
@@ -148,16 +126,7 @@ class App:
         pyxel.run(self.update, self.draw)
 
     def save(self):
-        data = []
-        for monster in self.my_monsters:
-            data.append(
-                {
-                    "monster_index": ALL_MONSTERS.index(monster.base_monster_instance),
-                    "win_count": monster.win_count,
-                }
-            )
-        with open("data.json", "w") as f:
-            json.dump(data, f)
+        pass
 
     def update(self):
         if self.scene == SELECT_ACTION_SCENE:
@@ -455,31 +424,12 @@ class App:
     def update_move_message_scene(self):
         time.sleep(1.5)
         if self.my_monster_battling.hp_now == 0:
-            # 自分のモンスターのHPがなくなったとき
-            # 全滅したとき、敗北シーンに移動
+            # 自分のモンスターのHPがなくなったとき、敗北シーンに移動
             self.scene = LOSE_SCENE
         elif self.opponent_monster_battling.hp_now == 0:
             # 相手のモンスターのHPが無くなったとき、場にいるモンスターの勝利回数が増加
             self.my_monster_battling.win_count += 1
-            if self.opponent_monsters[0].hp_now + self.opponent_monsters[1].hp_now == 0:
-                # 相手が全滅したら、勝利シーンに移動
-                self.scene = WIN_SCENE
-            else:
-                # 進化処理
-                if self.my_monster_battling.win_count == 1:
-                    # 勝利回数が1回なら進化
-                    self.my_monster_battling.base_monster_instance = ALL_MONSTERS[
-                        ALL_MONSTERS.index(
-                            self.my_monster_battling.base_monster_instance
-                        )
-                        + 1
-                    ]
-                # 相手の場にいるモンスターを次の相手モンスターに変更
-                self.opponent_monster_battling = self.opponent_monsters[
-                    self.opponent_monsters.index(self.opponent_monster_battling) + 1
-                ]
-                # 相手が場に出すシーンに移動
-                self.scene = OPPONENT_PUT_SCENE
+            self.scene = WIN_SCENE
         else:
             # 誰のHPも0にならないとき、技名シーンに移動
             self.scene = MOVE_NAME_SCENE
@@ -514,14 +464,10 @@ class App:
 
     # 相手が場に出すシーン
     def update_opponent_put_scene(self):
-        time.sleep(1)
-        self.select_triangle.reset(MESSAGE_Y[1])
-        self.scene = SELECT_ACTION_SCENE
+        pass
 
     def draw_opponent_put_scene(self):
-        _draw_message(
-            f"相手は{self.opponent_monster_battling.base_monster_instance.name}を繰り出した！"
-        )
+        pass
 
     # 勝利シーン
     def update_win_scene(self):
